@@ -88,7 +88,7 @@ print(data_type_handler.change_file_type(
     type_fields))
 
 
-preprocessing_code = '''
+preprocessing_code = '''python
 from pyspark.ml import Pipeline
 from pyspark.sql.functions import (
     mean, col, split,
