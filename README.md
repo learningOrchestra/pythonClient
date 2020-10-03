@@ -2,34 +2,323 @@
     <img src="./learningOrchestra-python-client.png">
 </p>
 
-## Installation
-Ensure which you have the python 3 installed in your machine and run:
+# learningOrchestra-python-client
+
+Python client for [learningOrchestra](https://github.com/learningOrchestra/learningOrchestra).
+
+# Installation
+
+Requires Python 3.x
+
 ```
-pip install learning_orchestra_cliet
+pip install learning-orchestra-client
 ```
 
-## Documentation
+# Usage
 
-After downloading the package, import all classes:
+Import learning_orchestra_client:
 
 ```python
 from learning_orchestra_client import *
 ```
 
-Create a Context object passing a ip from your cluster in constructor 
-parameter:
+Create a `Context` object passing an IP from your cluster  :
 
 ```python
 cluster_ip = "34.95.222.197"
 Context(cluster_ip)
 ```
 
-After create a Context object, you will able to usage learningOrchestra, each 
-learningOrchestra functionality is contained in your own class, therefore, to 
-use a specific functionality, after you instantiate and configure Context 
-class, you need instantiate and call the method class of interest, in below, 
-there are all class and each class methods, also have an example of workflow 
-using this package in a python code.
+After creating the `Context` object, you will be able to use learningOrchestra.
+
+Each functionality in learningOrchestra is contained in its own class. Check below for all the available [function APIs]().
+
+## Example
+
+Shown below is an example usage of learning-orchestra-client using the [Titanic Dataset](https://www.kaggle.com/c/titanic/overview):
+
+```python
+from learning_orchestra_client import *
+
+cluster_ip = "34.95.187.26"
+
+Context(cluster_ip)
+
+database_api = DatabaseApi()
+
+print(database_api.create_file(
+    "titanic_training",
+    "https://filebin.net/rpfdy8clm5984a4c/titanic_training.csv?t=gcnjz1yo"))
+print(database_api.create_file(
+    "titanic_testing",
+    "https://filebin.net/mguee52ke97k0x9h/titanic_testing.csv?t=ub4nc1rc"))
+
+print(database_api.read_resume_files())
+
+
+projection = Projection()
+non_required_columns = ["Name", "Ticket", "Cabin",
+                        "Embarked", "Sex", "Initial"]
+print(projection.create("titanic_training",
+                        "titanic_training_projection",
+                        non_required_columns))
+print(projection.create("titanic_testing",
+                        "titanic_testing_projection",
+                        non_required_columns))
+
+
+data_type_handler = DataTypeHandler()
+type_fields = {
+    "Age": "number",
+    "Pclass": "number",
+    "SibSp": "number"
+}
+
+print(data_type_handler.change_file_type(
+    "titanic_testing_projection",
+    type_fields))
+
+type_fields["Survived"] = "number"
+
+print(data_type_handler.change_file_type(
+    "titanic_training_projection",
+    type_fields))
+
+
+preprocessing_code = '''
+from pyspark.ml import Pipeline
+from pyspark.sql.functions import (
+    mean, col, split,
+    regexp_extract, when, lit)
+
+from pyspark.ml.feature import (
+    VectorAssembler,
+    StringIndexer
+)
+
+TRAINING_DF_INDEX = 0
+TESTING_DF_INDEX = 1
+
+training_df = training_df.withColumnRenamed('Survived', 'label')
+testing_df = testing_df.withColumn('label', lit(0))
+datasets_list = [training_df, testing_df]
+
+for index, dataset in enumerate(datasets_list):
+    dataset = dataset.withColumn(
+        "Initial",
+        regexp_extract(col("Name"), "([A-Za-z]+)\.", 1))
+    datasets_list[index] = dataset
+
+misspelled_initials = [
+    'Mlle', 'Mme', 'Ms', 'Dr',
+    'Major', 'Lady', 'Countess',
+    'Jonkheer', 'Col', 'Rev',
+    'Capt', 'Sir', 'Don'
+]
+correct_initials = [
+    'Miss', 'Miss', 'Miss', 'Mr',
+    'Mr', 'Mrs', 'Mrs',
+    'Other', 'Other', 'Other',
+    'Mr', 'Mr', 'Mr'
+]
+for index, dataset in enumerate(datasets_list):
+    dataset = dataset.replace(misspelled_initials, correct_initials)
+    datasets_list[index] = dataset
+
+
+initials_age = {"Miss": 22,
+                "Other": 46,
+                "Master": 5,
+                "Mr": 33,
+                "Mrs": 36}
+for index, dataset in enumerate(datasets_list):
+    for initial, initial_age in initials_age.items():
+        dataset = dataset.withColumn(
+            "Age",
+            when((dataset["Initial"] == initial) &
+                 (dataset["Age"].isNull()), initial_age).otherwise(
+                    dataset["Age"]))
+        datasets_list[index] = dataset
+
+
+for index, dataset in enumerate(datasets_list):
+    dataset = dataset.na.fill({"Embarked": 'S'})
+    datasets_list[index] = dataset
+
+
+for index, dataset in enumerate(datasets_list):
+    dataset = dataset.withColumn("Family_Size", col('SibSp')+col('Parch'))
+    dataset = dataset.withColumn('Alone', lit(0))
+    dataset = dataset.withColumn(
+        "Alone",
+        when(dataset["Family_Size"] == 0, 1).otherwise(dataset["Alone"]))
+    datasets_list[index] = dataset
+
+
+text_fields = ["Sex", "Embarked", "Initial"]
+for column in text_fields:
+    for index, dataset in enumerate(datasets_list):
+        dataset = StringIndexer(
+            inputCol=column, outputCol=column+"_index").\
+                fit(dataset).\
+                transform(dataset)
+        datasets_list[index] = dataset
+
+
+non_required_columns = ["Name", "Embarked", "Sex", "Initial"]
+for index, dataset in enumerate(datasets_list):
+    dataset = dataset.drop(*non_required_columns)
+    datasets_list[index] = dataset
+
+
+training_df = datasets_list[TRAINING_DF_INDEX]
+testing_df = datasets_list[TESTING_DF_INDEX]
+
+assembler = VectorAssembler(
+    inputCols=training_df.columns[:],
+    outputCol="features")
+assembler.setHandleInvalid('skip')
+
+features_training = assembler.transform(training_df)
+(features_training, features_evaluation) =\
+    features_training.randomSplit([0.8, 0.2], seed=33)
+features_testing = assembler.transform(testing_df)
+'''
+
+model_builder = Model()
+
+print(model_builder.create_model(
+    "titanic_training_projection",
+    "titanic_testing_projection",
+    preprocessing_code,
+    ["lr", "dt", "gb", "rf", "nb"]))
+```  "Fare": "number",
+    "Parch": "number",
+    "PassengerId": "number",
+    "Pclass": "number",
+    "SibSp": "number"
+}
+
+print(data_type_handler.change_file_type(
+    "titanic_testing_projection",
+    type_fields))
+
+type_fields["Survived"] = "number"
+
+print(data_type_handler.change_file_type(
+    "titanic_training_projection",
+    type_fields))
+
+
+preprocessing_code = '''
+from pyspark.ml import Pipeline
+from pyspark.sql.functions import (
+    mean, col, split,
+    regexp_extract, when, lit)
+
+from pyspark.ml.feature import (
+    VectorAssembler,
+    StringIndexer
+)
+
+TRAINING_DF_INDEX = 0
+TESTING_DF_INDEX = 1
+
+training_df = training_df.withColumnRenamed('Survived', 'label')
+testing_df = testing_df.withColumn('label', lit(0))
+datasets_list = [training_df, testing_df]
+
+for index, dataset in enumerate(datasets_list):
+    dataset = dataset.withColumn(
+        "Initial",
+        regexp_extract(col("Name"), "([A-Za-z]+)\.", 1))
+    datasets_list[index] = dataset
+
+misspelled_initials = [
+    'Mlle', 'Mme', 'Ms', 'Dr',
+    'Major', 'Lady', 'Countess',
+    'Jonkheer', 'Col', 'Rev',
+    'Capt', 'Sir', 'Don'
+]
+correct_initials = [
+    'Miss', 'Miss', 'Miss', 'Mr',
+    'Mr', 'Mrs', 'Mrs',
+    'Other', 'Other', 'Other',
+    'Mr', 'Mr', 'Mr'
+]
+for index, dataset in enumerate(datasets_list):
+    dataset = dataset.replace(misspelled_initials, correct_initials)
+    datasets_list[index] = dataset
+
+
+initials_age = {"Miss": 22,
+                "Other": 46,
+                "Master": 5,
+                "Mr": 33,
+                "Mrs": 36}
+for index, dataset in enumerate(datasets_list):
+    for initial, initial_age in initials_age.items():
+        dataset = dataset.withColumn(
+            "Age",
+            when((dataset["Initial"] == initial) &
+                 (dataset["Age"].isNull()), initial_age).otherwise(
+                    dataset["Age"]))
+        datasets_list[index] = dataset
+
+
+for index, dataset in enumerate(datasets_list):
+    dataset = dataset.na.fill({"Embarked": 'S'})
+    datasets_list[index] = dataset
+
+
+for index, dataset in enumerate(datasets_list):
+    dataset = dataset.withColumn("Family_Size", col('SibSp')+col('Parch'))
+    dataset = dataset.withColumn('Alone', lit(0))
+    dataset = dataset.withColumn(
+        "Alone",
+        when(dataset["Family_Size"] == 0, 1).otherwise(dataset["Alone"]))
+    datasets_list[index] = dataset
+
+
+text_fields = ["Sex", "Embarked", "Initial"]
+for column in text_fields:
+    for index, dataset in enumerate(datasets_list):
+        dataset = StringIndexer(
+            inputCol=column, outputCol=column+"_index").\
+                fit(dataset).\
+                transform(dataset)
+        datasets_list[index] = dataset
+
+
+non_required_columns = ["Name", "Embarked", "Sex", "Initial"]
+for index, dataset in enumerate(datasets_list):
+    dataset = dataset.drop(*non_required_columns)
+    datasets_list[index] = dataset
+
+
+training_df = datasets_list[TRAINING_DF_INDEX]
+testing_df = datasets_list[TESTING_DF_INDEX]
+
+assembler = VectorAssembler(
+    inputCols=training_df.columns[:],
+    outputCol="features")
+assembler.setHandleInvalid('skip')
+
+features_training = assembler.transform(training_df)
+(features_training, features_evaluation) =\
+    features_training.randomSplit([0.8, 0.2], seed=33)
+features_testing = assembler.transform(testing_df)
+'''
+
+model_builder = Model()
+
+print(model_builder.create_model(
+    "titanic_training_projection",
+    "titanic_testing_projection",
+    preprocessing_code,
+    ["lr", "dt", "gb", "rf", "nb"]))
+```
+
 
 ## DatabaseApi
 
@@ -252,167 +541,3 @@ This method returns string or number fields as a string list from a DataFrame.
 * `dataframe`: DataFrame instance
 * `is_string`: Boolean parameter, if `True`, the method returns the string DataFrame fields, otherwise, returns the numbers DataFrame fields.
 
-## learning_orchestra_client usage example
-
-In below there is a python script using the package with 
-[titanic challengue datasets](https://www.kaggle.com/c/titanic/overview):
-
-```python
-from learning_orchestra_client import *
-
-cluster_ip = "34.95.187.26"
-
-Context(cluster_ip)
-
-database_api = DatabaseApi()
-
-print(database_api.create_file(
-    "titanic_training",
-    "https://filebin.net/rpfdy8clm5984a4c/titanic_training.csv?t=gcnjz1yo"))
-print(database_api.create_file(
-    "titanic_testing",
-    "https://filebin.net/mguee52ke97k0x9h/titanic_testing.csv?t=ub4nc1rc"))
-
-print(database_api.read_resume_files())
-
-
-projection = Projection()
-non_required_columns = ["Name", "Ticket", "Cabin",
-                        "Embarked", "Sex", "Initial"]
-print(projection.create("titanic_training",
-                        "titanic_training_projection",
-                        non_required_columns))
-print(projection.create("titanic_testing",
-                        "titanic_testing_projection",
-                        non_required_columns))
-
-
-data_type_handler = DataTypeHandler()
-type_fields = {
-    "Age": "number",
-    "Fare": "number",
-    "Parch": "number",
-    "PassengerId": "number",
-    "Pclass": "number",
-    "SibSp": "number"
-}
-
-print(data_type_handler.change_file_type(
-    "titanic_testing_projection",
-    type_fields))
-
-type_fields["Survived"] = "number"
-
-print(data_type_handler.change_file_type(
-    "titanic_training_projection",
-    type_fields))
-
-
-preprocessing_code = '''
-from pyspark.ml import Pipeline
-from pyspark.sql.functions import (
-    mean, col, split,
-    regexp_extract, when, lit)
-
-from pyspark.ml.feature import (
-    VectorAssembler,
-    StringIndexer
-)
-
-TRAINING_DF_INDEX = 0
-TESTING_DF_INDEX = 1
-
-training_df = training_df.withColumnRenamed('Survived', 'label')
-testing_df = testing_df.withColumn('label', lit(0))
-datasets_list = [training_df, testing_df]
-
-for index, dataset in enumerate(datasets_list):
-    dataset = dataset.withColumn(
-        "Initial",
-        regexp_extract(col("Name"), "([A-Za-z]+)\.", 1))
-    datasets_list[index] = dataset
-
-misspelled_initials = [
-    'Mlle', 'Mme', 'Ms', 'Dr',
-    'Major', 'Lady', 'Countess',
-    'Jonkheer', 'Col', 'Rev',
-    'Capt', 'Sir', 'Don'
-]
-correct_initials = [
-    'Miss', 'Miss', 'Miss', 'Mr',
-    'Mr', 'Mrs', 'Mrs',
-    'Other', 'Other', 'Other',
-    'Mr', 'Mr', 'Mr'
-]
-for index, dataset in enumerate(datasets_list):
-    dataset = dataset.replace(misspelled_initials, correct_initials)
-    datasets_list[index] = dataset
-
-
-initials_age = {"Miss": 22,
-                "Other": 46,
-                "Master": 5,
-                "Mr": 33,
-                "Mrs": 36}
-for index, dataset in enumerate(datasets_list):
-    for initial, initial_age in initials_age.items():
-        dataset = dataset.withColumn(
-            "Age",
-            when((dataset["Initial"] == initial) &
-                 (dataset["Age"].isNull()), initial_age).otherwise(
-                    dataset["Age"]))
-        datasets_list[index] = dataset
-
-
-for index, dataset in enumerate(datasets_list):
-    dataset = dataset.na.fill({"Embarked": 'S'})
-    datasets_list[index] = dataset
-
-
-for index, dataset in enumerate(datasets_list):
-    dataset = dataset.withColumn("Family_Size", col('SibSp')+col('Parch'))
-    dataset = dataset.withColumn('Alone', lit(0))
-    dataset = dataset.withColumn(
-        "Alone",
-        when(dataset["Family_Size"] == 0, 1).otherwise(dataset["Alone"]))
-    datasets_list[index] = dataset
-
-
-text_fields = ["Sex", "Embarked", "Initial"]
-for column in text_fields:
-    for index, dataset in enumerate(datasets_list):
-        dataset = StringIndexer(
-            inputCol=column, outputCol=column+"_index").\
-                fit(dataset).\
-                transform(dataset)
-        datasets_list[index] = dataset
-
-
-non_required_columns = ["Name", "Embarked", "Sex", "Initial"]
-for index, dataset in enumerate(datasets_list):
-    dataset = dataset.drop(*non_required_columns)
-    datasets_list[index] = dataset
-
-
-training_df = datasets_list[TRAINING_DF_INDEX]
-testing_df = datasets_list[TESTING_DF_INDEX]
-
-assembler = VectorAssembler(
-    inputCols=training_df.columns[:],
-    outputCol="features")
-assembler.setHandleInvalid('skip')
-
-features_training = assembler.transform(training_df)
-(features_training, features_evaluation) =\
-    features_training.randomSplit([0.8, 0.2], seed=33)
-features_testing = assembler.transform(testing_df)
-'''
-
-model_builder = Model()
-
-print(model_builder.create_model(
-    "titanic_training_projection",
-    "titanic_testing_projection",
-    preprocessing_code,
-    ["lr", "dt", "gb", "rf", "nb"]))
-```
