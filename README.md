@@ -1,4 +1,6 @@
-# learningOrchestra client package
+<p align="center">
+    <img src="./learningOrchestra-python-client.png">
+</p>
 
 ## Installation
 Ensure which you have the python 3 installed in your machine and run:
