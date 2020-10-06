@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="learning_orchestra_client",
-    version="1.0.2",
+    version="1.0.3",
     author="Gabriel Ribeiro",
     author_email="gabbriel.rribeiro@gmail.com",
     description="learningOrchestra python client",
