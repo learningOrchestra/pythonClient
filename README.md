@@ -3,7 +3,6 @@
     <img src="https://img.shields.io/badge/build-passing-brightgreen?style=flat-square" href="https://shields.io/" alt="build-passing">
     <img src="https://img.shields.io/github/v/tag/learningOrchestra/learningOrchestra-python-client?style=flat-square" href="https://github.com/riibeirogabriel/learningOrchestra/tags" alt="tag">
     <img src="https://img.shields.io/github/last-commit/learningOrchestra/learningOrchestra-python-client?style=flat-square" href="https://github.com/learningOrchestra/learningOrchestra-python-client/tags" alt="last-commit">
-    <img src="https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square" href="#contributors-" alt="All Contributors">
 </p>
 
 # learningOrchestra-python-client
