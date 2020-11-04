@@ -60,14 +60,24 @@ print(database_api.read_resume_files())
 
 
 projection = Projection()
-non_required_columns = ["Name", "Ticket", "Cabin",
-                        "Embarked", "Sex", "Initial"]
+required_columns = [        "PassengerId",
+        "Pclass",
+        "Age",
+        "SibSp",
+        "Parch",
+        "Fare",
+        "Name",
+        "Sex",
+        "Embarked"]
 print(projection.create("titanic_training",
                         "titanic_training_projection",
-                        non_required_columns))
+                        required_columns))
+
+required_columns.remove("Survived")
+
 print(projection.create("titanic_testing",
                         "titanic_testing_projection",
-                        non_required_columns))
+                        required_columns))
 
 
 data_type_handler = DataTypeHandler()
