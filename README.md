@@ -61,15 +61,16 @@ print(database_api.read_resume_files())
 
 projection = Projection()
 required_columns = [
-        "PassengerId",
-        "Pclass",
-        "Age",
-        "SibSp",
-        "Parch",
-        "Fare",
-        "Name",
-        "Sex",
-        "Embarked"
+    "PassengerId",
+    "Pclass",
+    "Age",
+    "SibSp",
+    "Parch",
+    "Fare",
+    "Name",
+    "Sex",
+    "Embarked",
+    "Survived"
     ]
 print(projection.create("titanic_training",
                         "titanic_training_projection",
