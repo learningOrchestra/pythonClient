@@ -5,7 +5,7 @@
     <img src="https://img.shields.io/github/last-commit/learningOrchestra/learningOrchestra-python-client?style=flat-square" href="https://github.com/learningOrchestra/learningOrchestra-python-client/tags" alt="last-commit">
 </p>
 
-# learningOrchestra-python-client
+# pythonClient
 
 Python client for [learningOrchestra](https://github.com/learningOrchestra/learningOrchestra).
 
