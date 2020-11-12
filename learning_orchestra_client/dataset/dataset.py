@@ -8,8 +8,9 @@ __status__ = "Prototype"
 import requests
 import json
 import time
+import ast
 
-cluster_url = None
+from response_treat import ResponseTreat
 
 
 class Dataset:
@@ -18,21 +19,19 @@ class Dataset:
         # global cluster_url
         self.cluster_url = "http://" + ip_from_cluster + "/api/learningOrchestra/v1/dataset"
 
-    @staticmethod
-    def pretty_response(response):
-        """
-        description: This method is responsible to return an indented json file.
+    def insert_dataset_sync(self, dataset_name, url, pretty_response=True):
+        waiting = False
+        waiting = self.its_not_ready()
+        if waiting:
+            print("wait for process other dataset")
+        else:
+            cluster_url_dataset = self.cluster_url
+            request_body = {"datasetName": dataset_name, "url": url}
+            response = requests.post(url=cluster_url_dataset, json=request_body)
+            print("\n----------" + " CREATE FILE " + dataset_name + " ----------")
+            return ResponseTreat().treatment(response, pretty_response)
 
-        parsed: Json file that will be indented.
-
-        return: Indented json file.
-        """
-        parsed = response
-        return json.dumps(parsed, indent=4, sort_keys=True)
-
-    # def insert_dataset_async(self, dataset_name, url):
-
-    def insert_dataset_sync(self, dataset_name, url):
+    def insert_dataset_async(self, dataset_name, url, pretty_response=True):
         """
         description: This method is responsible to insert a dataset from a URI asynchronously, i.e., the caller does
         not wait until the dataset is inserted into the Learning Orchestra storage mechanism. Instead, the caller
@@ -48,10 +47,9 @@ class Dataset:
         request_body = {"datasetName": dataset_name, "url": url}
         response = requests.post(url=cluster_url_dataset, json=request_body)
         print("\n----------" + " CREATE FILE " + dataset_name + " ----------")
-        response = self.pretty_response(response.json())
-        return response
+        return ResponseTreat().treatment(response, pretty_response)
 
-    def search_all_datasets(self):
+    def search_all_datasets(self, pretty_response=True):
         """
         description: This method retrieves all datasets metadata, i.e., it does not retrieve the dataset content.
         dataset_name: Is the name of the dataset file.
@@ -60,12 +58,17 @@ class Dataset:
         """
         cluster_url_dataset = self.cluster_url
         response = requests.get(cluster_url_dataset)
-        response = self.pretty_response(response.json())
+        return ResponseTreat().treatment(response, pretty_response)
+
+    def search_dataset(self, dataset_name, pretty_response=True):
+        response = self.search_dataset_content(dataset_name, limit=1, pretty_response=pretty_response)
         return response
 
-    # def search_dataset(self):
+    # def update_dataset_sync(self, dataset_name, data_type:
 
-    def search_dataset_content(self, dataset_name, query, limit, skip):
+    # def update_dataset_async(self, dataset_name, data_type:
+
+    def search_dataset_content(self, dataset_name, query="{}", limit=0, skip=0, pretty_response=True):
         """
         description:  This method is responsible for retrieving the dataset content
 
@@ -80,14 +83,9 @@ class Dataset:
         cluster_url_dataset = self.cluster_url + "/" + dataset_name + "?query=" + query + "&limit=" + str(
             limit) + "&skip=" + str(skip)
         response = requests.get(cluster_url_dataset)
-        response = self.pretty_response(response.json())
-        return response
+        return ResponseTreat().treatment(response, pretty_response)
 
-    # def update_dataset_sync(self, dataset_name, data_type:
-
-    # def update_dataset_async(self, dataset_name, data_type:
-
-    def delete_dataset(self, dataset_name):
+    def delete_dataset(self, dataset_name, pretty_response=True):
         """
         description: This method is responsible for deleting the dataset. The delete operation is always synchronous
         because it is very fast, since the deletion is performed in background. If a dataset was used by another task
@@ -99,5 +97,9 @@ class Dataset:
         """
         cluster_url_dataset = self.cluster_url + "/" + dataset_name
         response = requests.delete(cluster_url_dataset)
-        response = self.pretty_response(response.json())
-        return response
+        return ResponseTreat().treatment(response, pretty_response)
+
+    def its_not_ready(self):
+        operable = self.search_all_datasets()
+        if '"finished": false' in operable:
+            return True
