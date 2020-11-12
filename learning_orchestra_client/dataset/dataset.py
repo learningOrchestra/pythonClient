@@ -16,14 +16,24 @@ from response_treat import ResponseTreat
 class Dataset:
 
     def __init__(self, ip_from_cluster):
-        # global cluster_url
         self.cluster_url = "http://" + ip_from_cluster + "/api/learningOrchestra/v1/dataset"
 
     def insert_dataset_sync(self, dataset_name, url, pretty_response=True):
+        """
+        description: This method is responsible to insert a dataset from a URI asynchronously, i.e., the caller wait
+        until the last dataset is inserted into the Learning Orchestra storage mechanism to insert other dataset.
+
+        waiting: Responsible to block other insert until last instead was done
+        dataset_name: Is the name of the dataset file that will be created.
+        url: Url to CSV file.
+
+        return: A JSON object with an error or warning message or a URL indicating the correct operation (the caller
+        must use such an URL to proceed future checks to verify if the dataset is inserted).
+        """
         waiting = False
         waiting = self.its_not_ready()
         if waiting:
-            print("wait for process other dataset")
+            print("waiting for the last dataset to be processed")
         else:
             cluster_url_dataset = self.cluster_url
             request_body = {"datasetName": dataset_name, "url": url}
@@ -100,6 +110,10 @@ class Dataset:
         return ResponseTreat().treatment(response, pretty_response)
 
     def its_not_ready(self):
+        """
+        description: This method check if all datasets has finished being inserted into the Learning Orchestra storage
+        mechanism.
+        """
         operable = self.search_all_datasets()
         if '"finished": false' in operable:
             return True

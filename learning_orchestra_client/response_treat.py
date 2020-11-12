@@ -17,12 +17,12 @@ class ResponseTreat:
 
     def treatment(self, response, pretty_response=True):
         """
-                description: This method is responsible to return an indented json file or a dict.
+        description: This method is responsible to return an indented json file or a dict.
 
-                response: file that will be indented.
+        response: file that will be indented.
 
-                return: Indented json file or a dict.
-                """
+        return: Indented json file or a dict.
+        """
         if response.status_code >= self.HTTP_ERROR:
             return response.text
         elif (
