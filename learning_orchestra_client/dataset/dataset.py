@@ -19,9 +19,10 @@ class Dataset:
 
     def insert_dataset_sync(self, dataset_name, url, pretty_response=False):
         """
-        description: This method is responsible to insert a dataset from a URI asynchronously, i.e., the caller wait
-        until the last dataset is inserted into the Learning Orchestra storage mechanism to insert other dataset.
+        description: This method is responsible to insert a dataset from a URI synchronously, i.e., the caller waits
+        until the dataset is inserted into the Learning Orchestra storage mechanism.
 
+        pretty_response: If true return indented string, else return dict.
         waiting: Responsible to block other insert until last insert was done
         dataset_name: Is the name of the dataset file that will be created.
         url: Url to CSV file.
@@ -43,6 +44,7 @@ class Dataset:
         not wait until the dataset is inserted into the Learning Orchestra storage mechanism. Instead, the caller
         receives a JSON object with a URL to proceed future calls to verify if the dataset is inserted.
 
+        pretty_response: If true return indented string, else return dict.
         dataset_name: Is the name of the dataset file that will be created.
         url: Url to CSV file.
 
@@ -59,6 +61,7 @@ class Dataset:
         """
         description: This method is responsible for retrieving a specific dataset
 
+        pretty_response: If true return indented string, else return dict.
         dataset_name: Is the name of the dataset file.
         limit: Number of rows to return in pagination(default: 10) (maximum is set at 20 rows per request)
         skip: Number of rows to skip in pagination(default: 0)
@@ -72,6 +75,8 @@ class Dataset:
         """
         description: This method retrieves all datasets metadata, i.e., it does not retrieve the dataset content.
 
+        pretty_response: If true return indented string, else return dict.
+
         return: All datasets metadata stored in Learning Orchestra or an empty result.
         """
         cluster_url_dataset = self.cluster_url
@@ -82,6 +87,7 @@ class Dataset:
         """
         description:  This method is responsible for retrieving the dataset content
 
+        pretty_response: If true return indented string, else return dict.
         dataset_name: Is the name of the dataset file.
         query: Query to make in MongoDB(default: empty query)
         limit: Number of rows to return in pagination(default: 10) (maximum is set at 20 rows per request)
@@ -101,6 +107,7 @@ class Dataset:
         because it is very fast, since the deletion is performed in background. If a dataset was used by another task
         (Ex. projection, histogram, pca, tuning and so forth), it cannot be deleted.
 
+        pretty_response: If true return indented string, else return dict.
         dataset_name: Represents the dataset name.
 
         return: JSON object with an error message, a warning message or a correct delete message
@@ -115,11 +122,13 @@ class Dataset:
 
     def its_ready(self, dataset_name, pretty_response=True):
         """
-        description: This method check if all datasets has finished being inserted into the Learning Orchestra storage
-        mechanism.
+        description: This method check from time to time using Time lib, if a dataset has finished being inserted
+        into the Learning Orchestra storage mechanism.
+
+        pretty_response: If true return indented string, else return dict.
         """
         if pretty_response:
-            print("\n----------" + " WAITING " + dataset_name + " FINISH " + "----------")
+            print("\n---------- WAITING " + dataset_name + " FINISH ----------")
         while True:
             time.sleep(self.WAIT_TIME)
             response = self.search_dataset_content(dataset_name, limit=1, pretty_response=False)

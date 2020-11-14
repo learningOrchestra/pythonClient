@@ -2,8 +2,9 @@
 
 """
 from response_treat import ResponseTreat
-import requests
 from dataset.dataset import Dataset
+import requests
+import time
 
 
 class Projection:
@@ -30,6 +31,7 @@ class Projection:
         """
         description:  This method is responsible for retrieving a specific projection
 
+        pretty_response: If true return indented string, else return dict.
         dataset_name: Is the name of the dataset file.
         limit: Number of rows to return in pagination(default: 10) (maximum is set at 20 rows per request)
         skip: Number of rows to skip in pagination(default: 0)
@@ -43,6 +45,8 @@ class Projection:
         """
         description: This method retrieves all projection metadata, it does not retrieve the projection content.
 
+        pretty_response: If true return indented string, else return dict.
+
         return: All projections metadata stored in Learning Orchestra or an empty result.
         """
         cluster_url_projection = self.cluster_url
@@ -53,6 +57,7 @@ class Projection:
         """
         description: This method is responsible for retrieving the dataset content
 
+        pretty_response: If true return indented string, else return dict.
         dataset_name: Is the name of the dataset file.
         query: Query to make in MongoDB(default: empty query)
         limit: Number of rows to return in pagination(default: 10) (maximum is set at 20 rows per request)
@@ -72,6 +77,7 @@ class Projection:
         because it is very fast, since the deletion is performed in background. If a projection was used by another task
         (Ex. histogram, pca, tuning and so forth), it cannot be deleted.
 
+        pretty_response: If true return indented string, else return dict.
         projection_name: Represents the projection name.
 
         return: JSON object with an error message, a warning message or a correct delete message
@@ -80,16 +86,34 @@ class Projection:
         response = requests.delete(cluster_url_projection)
         return ResponseTreat().treatment(response, pretty_response)
 
-    def its_ready(self):
+    def its_ready(self, projection_name, pretty_response=True):
         """
-        description: This method check if all datasets has finished being inserted into the Learning Orchestra storage
-        mechanism.
+        description: This method check from time to time using Time lib, if a projection has finished being inserted
+        into the Learning Orchestra storage mechanism.
+
+        pretty_response: If true return indented string, else return dict.
         """
-        operable = self.search_all_projections()
-        if '"finished": false' in operable:
-            return True
+        if pretty_response:
+            print("\n---------- WAITING " + projection_name + " FINISH ----------")
+        while True:
+            time.sleep(self.WAIT_TIME)
+            response = self.search_projections_content(projection_name, limit=1, pretty_response=False)
+            if len(response["result"]) == 0:
+                continue
+            if response["result"][self.METADATA_INDEX]["finished"]:
+                break
 
     def insert_dataset_attributes_async(self, dataset_name, projection_name, fields, pretty_response=False):
+        """
+        description: This method inserts a set of attributes into a dataset. It can create a new dataset or reuse the
+        existing one.
+
+        pretty_response: If true return indented string, else return dict.
+        datasetName: Represents the dataset name.
+        fields: Represents the set of attributes to be inserted.
+
+        return: A JSON object with error or warning messages. In case of success, it returns the dataset metadata.
+        """
         if pretty_response:
             print(
                 "\n----------"
