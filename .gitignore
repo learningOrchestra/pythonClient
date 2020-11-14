@@ -1,4 +1,6 @@
 .idea
-/learning_orchestra_client/main.py
-/learning_orchestra_client/__pycache__
-/learning_orchestra_client/.idea
+learning_orchestra_client/.idea
+learning_orchestra_client/__pycache__
+learning_orchestra_client/dataset/__pycache__
+learning_orchestra_client/transform/__pycache__
+learning_orchestra_client/main.py
