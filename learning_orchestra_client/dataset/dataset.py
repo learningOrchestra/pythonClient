@@ -7,15 +7,15 @@ __status__ = "Prototype"
 
 from response_treat import ResponseTreat
 import requests
-import json
 import time
-import ast
 
 
 class Dataset:
 
     def __init__(self, ip_from_cluster):
         self.cluster_url = "http://" + ip_from_cluster + "/api/learningOrchestra/v1/dataset"
+        self.WAIT_TIME = 10
+        self.METADATA_INDEX = 0
 
     def insert_dataset_sync(self, dataset_name, url, pretty_response=False):
         """
@@ -29,16 +29,13 @@ class Dataset:
         return: A JSON object with an error or warning message or a URL indicating the correct operation (the caller
         must use such an URL to proceed future checks to verify if the dataset is inserted).
         """
-        waiting = self.its_ready()
-        if not waiting:
-            print("waiting for the last dataset to be processed")
-        else:
-            cluster_url_dataset = self.cluster_url
-            request_body = {"datasetName": dataset_name, "url": url}
-            response = requests.post(url=cluster_url_dataset, json=request_body)
-            if pretty_response:
-                print("\n----------" + " CREATE FILE " + dataset_name + " ----------")
-            return ResponseTreat().treatment(response, pretty_response)
+        cluster_url_dataset = self.cluster_url
+        request_body = {"datasetName": dataset_name, "url": url}
+        response = requests.post(url=cluster_url_dataset, json=request_body)
+        self.its_ready(dataset_name, pretty_response)
+        if pretty_response:
+            print("\n----------" + " CREATED FILE " + dataset_name + " ----------")
+        return ResponseTreat().treatment(response, pretty_response)
 
     def insert_dataset_async(self, dataset_name, url, pretty_response=False):
         """
@@ -116,11 +113,17 @@ class Dataset:
 
     # def update_dataset_async(self, dataset_name, data_type:
 
-    def its_ready(self):
+    def its_ready(self, dataset_name, pretty_response=True):
         """
         description: This method check if all datasets has finished being inserted into the Learning Orchestra storage
         mechanism.
         """
-        operable = self.search_all_datasets()
-        if '"finished": false' in operable:
-            return True
+        if pretty_response:
+            print("\n----------" + " WAITING " + dataset_name + " FINISH " + "----------")
+        while True:
+            time.sleep(self.WAIT_TIME)
+            response = self.search_dataset_content(dataset_name, limit=1, pretty_response=False)
+            if len(response["result"]) == 0:
+                continue
+            if response["result"][self.METADATA_INDEX]["finished"]:
+                break

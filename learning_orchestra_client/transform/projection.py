@@ -3,6 +3,7 @@
 """
 from response_treat import ResponseTreat
 import requests
+from dataset.dataset import Dataset
 
 
 class Projection:
@@ -103,6 +104,7 @@ class Projection:
             "outputDatasetName": projection_name,
             "names": fields,
         }
+        Dataset.its_ready(dataset_name, pretty_response)
         request_url = self.cluster_url
         response = requests.post(url=request_url, json=request_body)
         return ResponseTreat().treatment(response, pretty_response)
