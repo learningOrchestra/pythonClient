@@ -88,6 +88,25 @@ class Projection:
         if '"finished": false' in operable:
             return True
 
+    def insert_dataset_attributes_async(self, dataset_name, projection_name, fields, pretty_response=False):
+        if pretty_response:
+            print(
+                "\n----------"
+                + " CREATE PROJECTION FROM "
+                + dataset_name
+                + " TO "
+                + projection_name
+                + " ----------"
+            )
+        request_body = {
+            "inputDatasetName": dataset_name,
+            "outputDatasetName": projection_name,
+            "names": fields,
+        }
+        request_url = self.cluster_url
+        response = requests.post(url=request_url, json=request_body)
+        return ResponseTreat().treatment(response, pretty_response)
+
 
 
 
