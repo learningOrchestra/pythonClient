@@ -1,6 +1,3 @@
-"""
-
-"""
 from response_treat import ResponseTreat
 from dataset.dataset import Dataset
 import requests

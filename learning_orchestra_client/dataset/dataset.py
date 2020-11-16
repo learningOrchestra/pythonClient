@@ -1,6 +1,3 @@
-"""
-
-"""
 __author__ = "Otavio Henrique Rodrigues Mapa & Matheus Goncalves Ribeiro"
 __credits__ = "all free source developers"
 __status__ = "Prototype"
