@@ -17,7 +17,7 @@ class Projection:
         self.INPUT_NAME = "inputDatasetName"
         self.OUTPUT_NAME = "outputDatasetName"
         self.FIELDS = "names"
-        self.Dataset = Dataset
+        self.Dataset = Dataset(ip_from_cluster)
 
     def delete_dataset_attributes_sync(self, dataset_name, projection_name,
                                        fields_to_delete, pretty_response=False):
