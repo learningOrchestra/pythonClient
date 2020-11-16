@@ -17,6 +17,7 @@ class Projection:
         self.INPUT_NAME = "inputDatasetName"
         self.OUTPUT_NAME = "outputDatasetName"
         self.FIELDS = "names"
+        self.Dataset = Dataset
 
     def delete_dataset_attributes_sync(self, dataset_name, projection_name,
                                        fields_to_delete, pretty_response=False):
@@ -32,7 +33,8 @@ class Projection:
         """
         dataset_metadata = self.search_projections_content(dataset_name,
                                                            limit=1)
-        fields_to_insert = dataset_metadata.get('result')[0].get('fields')
+        fields_to_insert = dataset_metadata.get('result')[self.METADATA_INDEX]\
+                                           .get('fields')
         for field in fields_to_delete:
             fields_to_insert.remove(field)
         response = self.insert_dataset_attributes_sync(dataset_name,
@@ -60,6 +62,8 @@ class Projection:
         }
         request_url = self.cluster_url
         response = requests.post(url=request_url, json=request_body)
+        self.Dataset.verify_dataset_processing_done(dataset_name,
+                                                    pretty_response)
         self.verify_projection_processing_done(projection_name, pretty_response)
         if pretty_response:
             print(
@@ -199,7 +203,8 @@ class Projection:
         """
         dataset_metadata = self.search_projections_content(dataset_name,
                                                            limit=1)
-        fields_to_insert = dataset_metadata.get('result')[0].get('fields')
+        fields_to_insert = dataset_metadata.get('result')[self.METADATA_INDEX]\
+                                           .get('fields')
         for field in fields_to_delete:
             fields_to_insert.remove(field)
         response = self.insert_dataset_attributes_async(dataset_name,
@@ -225,7 +230,8 @@ class Projection:
             self.OUTPUT_NAME: projection_name,
             self.FIELDS: fields,
         }
-        Dataset.verify_dataset_processing_done(dataset_name, pretty_response)
+        self.Dataset.verify_dataset_processing_done(dataset_name,
+                                                    pretty_response)
         request_url = self.cluster_url
         response = requests.post(url=request_url, json=request_body)
         if pretty_response:
