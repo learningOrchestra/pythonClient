@@ -97,7 +97,7 @@ class Dataset:
         response = requests.get(cluster_url_dataset)
         return self.ResponseTreat.treatment(response, pretty_response)
 
-    def search_dataset_content(self, dataset_name, query={}, limit=10, skip=0,
+    def search_dataset_content(self, dataset_name, query=None, limit=10, skip=0,
                                pretty_response=False):
         """
         description:  This method is responsible for retrieving the dataset
@@ -114,10 +114,12 @@ class Dataset:
         is no such dataset. The current page is also returned to be used in
         future content requests.
         """
-        cluster_url_dataset = self.cluster_url + "/" + dataset_name \
-                              + "?query=" + str(query) \
-                              + "&limit=" + str(limit) \
-                              + "&skip=" + str(skip)
+        if query is None:
+            query = {}
+        cluster_url_dataset = self.cluster_url + "/" + dataset_name + \
+                                                 "?query=" + str(query) +\
+                                                 "&limit=" + str(limit) + \
+                                                 "&skip=" + str(skip)
         response = requests.get(cluster_url_dataset)
         return self.ResponseTreat.treatment(response, pretty_response)
 
@@ -144,7 +146,7 @@ class Dataset:
     # def update_dataset_async(self, dataset_name, data_type:
 
     def verify_dataset_processing_done(self, dataset_name,
-                                        pretty_response=True):
+                                       pretty_response=True):
         """
         description: This method check from time to time using Time lib, if a
         dataset has finished being inserted

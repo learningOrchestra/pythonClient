@@ -44,9 +44,10 @@ class Projection:
         return: Specific projection metadata stored in Learning Orchestra or an
         error if there is no such projections.
         """
-        response = self.search_projections_content(projection_name, limit=1,
-                                                   pretty_response=
-                                                        pretty_response)
+        pretty = pretty_response
+        response = self.search_projections_content(projection_name,
+                                                   limit=1,
+                                                   pretty_response=pretty)
         return response
 
     def search_all_projections(self, pretty_response=False):
@@ -63,7 +64,7 @@ class Projection:
         response = requests.get(cluster_url_projection)
         return ResponseTreat().treatment(response, pretty_response)
 
-    def search_projections_content(self, projection_name, query={}, limit=10,
+    def search_projections_content(self, projection_name, query=None, limit=10,
                                    skip=0, pretty_response=False):
         """
         description: This method is responsible for retrieving the dataset
@@ -80,9 +81,12 @@ class Projection:
         is no such dataset. The current page is also returned to be used in
         future content requests.
         """
-        cluster_url_projection = self.cluster_url + "/" + projection_name \
-                                 + "?query=" + str(query) + "&limit=" + str(
-                                    limit) + "&skip=" + str(skip)
+        if query is None:
+            query = {}
+        cluster_url_projection = self.cluster_url + "/" + projection_name +\
+                                                    "?query=" + str(query) + \
+                                                    "&limit=" + str(limit) + \
+                                                    "&skip=" + str(skip)
         response = requests.get(cluster_url_projection)
         return ResponseTreat().treatment(response, pretty_response)
 
