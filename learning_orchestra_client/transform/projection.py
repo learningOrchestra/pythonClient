@@ -10,11 +10,11 @@ class Projection:
                            "/api/learningOrchestra/v1/transform/projection"
         self.WAIT_TIME = 3
         self.METADATA_INDEX = 0
-        self.ResponseTreat = ResponseTreat()
+        self.response_treat = ResponseTreat()
         self.INPUT_NAME = "inputDatasetName"
         self.OUTPUT_NAME = "outputDatasetName"
         self.FIELDS = "names"
-        self.Dataset = Dataset(ip_from_cluster)
+        self.dataset = Dataset(ip_from_cluster)
 
     def delete_dataset_attributes_sync(self, dataset_name, projection_name,
                                        fields_to_delete, pretty_response=False):
@@ -59,7 +59,7 @@ class Projection:
         }
         request_url = self.cluster_url
         response = requests.post(url=request_url, json=request_body)
-        self.Dataset.verify_dataset_processing_done(dataset_name,
+        self.dataset.verify_dataset_processing_done(dataset_name,
                                                     pretty_response)
         self.verify_projection_processing_done(projection_name, pretty_response)
         if pretty_response:
@@ -71,7 +71,7 @@ class Projection:
                 + projection_name
                 + " ----------"
             )
-        return self.ResponseTreat.treatment(response, pretty_response)
+        return self.response_treat.treatment(response, pretty_response)
 
     # def insert_dataset_attribute_sync(self):
 
@@ -116,9 +116,9 @@ class Projection:
         """
         cluster_url_projection = self.cluster_url
         response = requests.get(cluster_url_projection)
-        return self.ResponseTreat.treatment(response, pretty_response)
+        return self.response_treat.treatment(response, pretty_response)
 
-    def search_projections_content(self, projection_name, query=None, limit=10,
+    def search_projections_content(self, projection_name, query={}, limit=10,
                                    skip=0, pretty_response=False):
         """
         description: This method is responsible for retrieving the dataset
@@ -135,14 +135,13 @@ class Projection:
         is no such dataset. The current page is also returned to be used in
         future content requests.
         """
-        if query is None:
-            query = {}
+
         cluster_url_projection = self.cluster_url + "/" + projection_name + \
                                                     "?query=" + str(query) + \
                                                     "&limit=" + str(limit) + \
                                                     "&skip=" + str(skip)
         response = requests.get(cluster_url_projection)
-        return self.ResponseTreat.treatment(response, pretty_response)
+        return self.response_treat.treatment(response, pretty_response)
 
     def delete_projections(self, projection_name, pretty_response=False):
         """
@@ -160,7 +159,7 @@ class Projection:
         """
         cluster_url_projection = self.cluster_url + "/" + projection_name
         response = requests.delete(cluster_url_projection)
-        return self.ResponseTreat.treatment(response, pretty_response)
+        return self.response_treat.treatment(response, pretty_response)
 
     def verify_projection_processing_done(self, projection_name,
                                           pretty_response=False):
@@ -227,7 +226,7 @@ class Projection:
             self.OUTPUT_NAME: projection_name,
             self.FIELDS: fields,
         }
-        self.Dataset.verify_dataset_processing_done(dataset_name,
+        self.dataset.verify_dataset_processing_done(dataset_name,
                                                     pretty_response)
         request_url = self.cluster_url
         response = requests.post(url=request_url, json=request_body)
@@ -240,4 +239,4 @@ class Projection:
                 + projection_name
                 + " ----------"
             )
-        return self.ResponseTreat.treatment(response, pretty_response)
+        return self.response_treat.treatment(response, pretty_response)

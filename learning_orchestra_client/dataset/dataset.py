@@ -14,7 +14,7 @@ class Dataset:
                            "/api/learningOrchestra/v1/dataset"
         self.WAIT_TIME = 3
         self.METADATA_INDEX = 0
-        self.ResponseTreat = ResponseTreat()
+        self.response_treat = ResponseTreat()
 
     def insert_dataset_sync(self, dataset_name, url, pretty_response=False):
         """
@@ -38,7 +38,7 @@ class Dataset:
         if pretty_response:
             print("\n----------" + " CREATED FILE " + dataset_name + " -------"
                                                                      "---")
-        return self.ResponseTreat.treatment(response, pretty_response)
+        return self.response_treat.treatment(response, pretty_response)
 
     def insert_dataset_async(self, dataset_name, url, pretty_response=False):
         """
@@ -60,7 +60,7 @@ class Dataset:
         request_body = {"datasetName": dataset_name, "url": url}
         response = requests.post(url=cluster_url_dataset, json=request_body)
         print("\n----------" + " CREATE FILE " + dataset_name + " ----------")
-        return self.ResponseTreat.treatment(response, pretty_response)
+        return self.response_treat.treatment(response, pretty_response)
 
     def search_dataset(self, dataset_name, pretty_response=False):
         """
@@ -92,9 +92,9 @@ class Dataset:
         """
         cluster_url_dataset = self.cluster_url
         response = requests.get(cluster_url_dataset)
-        return self.ResponseTreat.treatment(response, pretty_response)
+        return self.response_treat.treatment(response, pretty_response)
 
-    def search_dataset_content(self, dataset_name, query=None, limit=10, skip=0,
+    def search_dataset_content(self, dataset_name, query={}, limit=10, skip=0,
                                pretty_response=False):
         """
         description:  This method is responsible for retrieving the dataset
@@ -111,14 +111,13 @@ class Dataset:
         is no such dataset. The current page is also returned to be used in
         future content requests.
         """
-        if query is None:
-            query = {}
+
         cluster_url_dataset = self.cluster_url + "/" + dataset_name + \
                                                  "?query=" + str(query) +\
                                                  "&limit=" + str(limit) + \
                                                  "&skip=" + str(skip)
         response = requests.get(cluster_url_dataset)
-        return self.ResponseTreat.treatment(response, pretty_response)
+        return self.response_treat.treatment(response, pretty_response)
 
     def delete_dataset(self, dataset_name, pretty_response=False):
         """
@@ -136,7 +135,7 @@ class Dataset:
         """
         cluster_url_dataset = self.cluster_url + "/" + dataset_name
         response = requests.delete(cluster_url_dataset)
-        return self.ResponseTreat.treatment(response, pretty_response)
+        return self.response_treat.treatment(response, pretty_response)
 
     # def update_dataset_sync(self, dataset_name, data_type:
 
