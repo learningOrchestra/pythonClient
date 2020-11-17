@@ -23,12 +23,12 @@ class Pca:
 
     def search_all_pca(self, pretty_response=False):
         """
-        description: This method retrieves all PCAs metadata, it does not
-        retrieve the projection content.
+        description: This method retrieves all PCAs plot names, it does not
+        retrieve the image plot.
 
         pretty_response: If true return indented string, else return dict.
 
-        return: All PCAs metadata stored in Learning Orchestra or an
+        return: All PCAs plot names stored in Learning Orchestra or an
         empty result.
         """
         cluster_url_pca = self.cluster_url
@@ -39,7 +39,13 @@ class Pca:
 
     def search_pca_plot(self, pca_name, pretty_response=False):
         """
+        description: This method retrieves PCA image plot.
 
+        pca_name: Name of PCA image plot.
+        pretty_response: If true open an image plot, else return link to
+        open image plot.
+
+        return: An image plot or link to an image plot.
         """
         if pretty_response:
             print(
@@ -52,13 +58,19 @@ class Pca:
         cluster_url_pca = self.cluster_url + "/" + pca_name
         img = Image.open(requests.get(cluster_url_pca, stream=True).raw)
         if pretty_response:
-            return img.show()
+            img.show()
         else:
             return cluster_url_pca
 
     def search_pca(self, pca_name):
         """
+        description: This method retrieves PCA image plot.
 
+        pca_name: Name of PCA image plot.
+        pretty_response: If true open an image plot, else return link to
+        open image plot.
+
+        return: An image plot or link to an image plot.
         """
         all_pca = self.search_all_pca()
         pca_name += ".png"
@@ -70,7 +82,16 @@ class Pca:
     def run_pca_async(self, dataset_name, pca_name, label,
                       pretty_response=False):
         """
+        description: This method run PCA algorithm to create an image plot.
 
+        dataset_name: Name of dataset. pca_name: Name of PCA image plot.
+        label: The label is the label name of the column for machine learning
+        datasets which has labeled tuples.
+        pretty_response: If true open an image plot, else return link to open
+        image plot.
+
+        return: A JSON object with error or warning messages. In case of
+        success, it returns an image plot.
         """
         request_body = {
             self.INPUT_NAME: dataset_name,
@@ -95,7 +116,16 @@ class Pca:
     def run_pca_sync(self, dataset_name, pca_name, label,
                      pretty_response=False):
         """
+        description: This method run PCA algorithm to create an image plot.
 
+        dataset_name: Name of dataset. pca_name: Name of PCA image plot.
+        label: The label is the label name of the column for machine learning
+        datasets which has labeled tuples.
+        pretty_response: If true open an image plot, else return link to open
+        image plot.
+
+        return: A JSON object with error or warning messages. In case of
+        success, it returns an image plot.
         """
         request_body = {
             self.INPUT_NAME: dataset_name,
@@ -141,8 +171,16 @@ class Pca:
                 break
 
     def delete_pca_plot(self, pca_name, pretty_response=False):
-        """
+        """"
+        description: This method is responsible for deleting the PCA image plot.
+        The delete operation is always synchronous because it is very fast,
+        since the deletion is performed in background.
 
+        pretty_response: If true return indented string, else return dict.
+        dataset_name: Represents the dataset name.
+
+        return: JSON object with an error message, a warning message or a
+        correct delete message.
         """
         cluster_url_pca = self.cluster_url + "/" + pca_name
         response = requests.delete(cluster_url_pca)

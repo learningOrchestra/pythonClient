@@ -28,8 +28,7 @@ class Dataset:
         url: Url to CSV file.
 
         return: A JSON object with an error or warning message or a URL
-        indicating the correct operation (the caller must use such an URL to
-        proceed future checks to verify if the dataset is inserted).
+        indicating the correct operation.
         """
         cluster_url_dataset = self.cluster_url
         request_body = {"datasetName": dataset_name, "url": url}

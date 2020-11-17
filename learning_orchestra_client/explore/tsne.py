@@ -52,7 +52,7 @@ class Tsne:
         cluster_url_tsne = self.cluster_url + "/" + tsne_name
         img = Image.open(requests.get(cluster_url_tsne, stream=True).raw)
         if pretty_response:
-            return img.show()
+            img.show()
         else:
             return cluster_url_tsne
 
