@@ -17,7 +17,7 @@ class DataType:
         """
         description: Change types of fields to number or string.
 
-        datasetName: Represents the dataset name.
+        dataset_name: Represents the dataset name.
         fields_change: Fields to change with types.
 
         return: A JSON object with error or warning messages.

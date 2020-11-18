@@ -23,7 +23,6 @@ class Dataset:
         the Learning Orchestra storage mechanism.
 
         pretty_response: If true return indented string, else return dict.
-        waiting: Responsible to block other insert until last insert was done
         dataset_name: Is the name of the dataset file that will be created.
         url: Url to CSV file.
 
@@ -61,6 +60,20 @@ class Dataset:
         print("\n----------" + " CREATE FILE " + dataset_name + " ----------")
         return self.response_treat.treatment(response, pretty_response)
 
+    def search_all_datasets(self, pretty_response=False):
+        """
+        description: This method retrieves all datasets metadata, i.e., it does
+        not retrieve the dataset content.
+
+        pretty_response: If true return indented string, else return dict.
+
+        return: All datasets metadata stored in Learning Orchestra or an empty
+        result.
+        """
+        cluster_url_dataset = self.cluster_url
+        response = requests.get(cluster_url_dataset)
+        return self.response_treat.treatment(response, pretty_response)
+
     def search_dataset(self, dataset_name, pretty_response=False):
         """
         description: This method is responsible for retrieving a specific
@@ -78,20 +91,6 @@ class Dataset:
         response = self.search_dataset_content(dataset_name, limit=1,
                                                pretty_response=pretty_response)
         return response
-
-    def search_all_datasets(self, pretty_response=False):
-        """
-        description: This method retrieves all datasets metadata, i.e., it does
-        not retrieve the dataset content.
-
-        pretty_response: If true return indented string, else return dict.
-
-        return: All datasets metadata stored in Learning Orchestra or an empty
-        result.
-        """
-        cluster_url_dataset = self.cluster_url
-        response = requests.get(cluster_url_dataset)
-        return self.response_treat.treatment(response, pretty_response)
 
     def search_dataset_content(self, dataset_name, query={}, limit=10, skip=0,
                                pretty_response=False):
@@ -135,10 +134,6 @@ class Dataset:
         cluster_url_dataset = self.cluster_url + "/" + dataset_name
         response = requests.delete(cluster_url_dataset)
         return self.response_treat.treatment(response, pretty_response)
-
-    # def update_dataset_sync(self, dataset_name, data_type:
-
-    # def update_dataset_async(self, dataset_name, data_type:
 
     def verify_dataset_processing_done(self, dataset_name,
                                        pretty_response=True):
