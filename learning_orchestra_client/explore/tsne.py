@@ -50,8 +50,8 @@ class Tsne:
                 + " ----------"
             )
         cluster_url_tsne = self.cluster_url + "/" + tsne_name
-        img = Image.open(requests.get(cluster_url_tsne, stream=True).raw)
         if pretty_response:
+            img = Image.open(requests.get(cluster_url_tsne, stream=True).raw)
             img.show()
         else:
             return cluster_url_tsne
@@ -62,10 +62,7 @@ class Tsne:
         """
         all_tsne = self.search_all_tsne()
         tsne_name += ".png"
-        if tsne_name in all_tsne.get('result'):
-            return True
-        else:
-            return False
+        return tsne_name in all_tsne.get('result')
 
     def run_tsne_async(self, dataset_name, tsne_name, label,
                        pretty_response=False):
@@ -135,10 +132,9 @@ class Tsne:
         while True:
             time.sleep(self.WAIT_TIME)
             response = self.search_tsne(tsne_name)
-            if not response:
-                continue
             if response:
                 break
+            continue
 
     def delete_tsne_plot(self, tsne_name, pretty_response=False):
         """

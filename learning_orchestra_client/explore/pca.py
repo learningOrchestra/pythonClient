@@ -56,8 +56,8 @@ class Pca:
                 + " ----------"
             )
         cluster_url_pca = self.cluster_url + "/" + pca_name
-        img = Image.open(requests.get(cluster_url_pca, stream=True).raw)
         if pretty_response:
+            img = Image.open(requests.get(cluster_url_pca, stream=True).raw)
             img.show()
         else:
             return cluster_url_pca
@@ -74,10 +74,7 @@ class Pca:
         """
         all_pca = self.search_all_pca()
         pca_name += ".png"
-        if pca_name in all_pca.get('result'):
-            return True
-        else:
-            return False
+        return pca_name in all_pca.get('result')
 
     def run_pca_async(self, dataset_name, pca_name, label,
                       pretty_response=False):
@@ -165,10 +162,9 @@ class Pca:
         while True:
             time.sleep(self.WAIT_TIME)
             response = self.search_pca(pca_name)
-            if not response:
-                continue
             if response:
                 break
+            continue
 
     def delete_pca_plot(self, pca_name, pretty_response=False):
         """"
