@@ -64,7 +64,7 @@ class Builder:
 
         self.verify_model_processing_done(train_dataset_name,
                                           pretty_response=pretty_response)
-        self.verify_model_processing_done(train_dataset_name,
+        self.verify_model_processing_done(test_dataset_name,
                                           pretty_response=pretty_response)
 
         return self.response_treat.treatment(response, pretty_response)
