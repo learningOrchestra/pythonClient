@@ -57,10 +57,10 @@ class Projection:
             self.OUTPUT_NAME: projection_name,
             self.FIELDS: fields,
         }
-        request_url = self.cluster_url
-        response = requests.post(url=request_url, json=request_body)
         self.dataset.verify_dataset_processing_done(dataset_name,
                                                     pretty_response)
+        request_url = self.cluster_url
+        response = requests.post(url=request_url, json=request_body)
         self.verify_projection_processing_done(projection_name, pretty_response)
         if pretty_response:
             print(

@@ -81,7 +81,7 @@ class Tsne:
         if pretty_response:
             print(
                 "\n----------"
-                + " CREATE tsne IMAGE PLOT FROM "
+                + " CREATE TSNE IMAGE PLOT FROM "
                 + dataset_name
                 + " TO "
                 + tsne_name
