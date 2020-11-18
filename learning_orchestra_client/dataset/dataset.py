@@ -111,7 +111,7 @@ class Dataset:
         """
 
         cluster_url_dataset = self.cluster_url + "/" + dataset_name + \
-                                                 "?query=" + str(query) +\
+                                                 "?query=" + str(query) + \
                                                  "&limit=" + str(limit) + \
                                                  "&skip=" + str(skip)
         response = requests.get(cluster_url_dataset)
@@ -136,7 +136,7 @@ class Dataset:
         return self.response_treat.treatment(response, pretty_response)
 
     def verify_dataset_processing_done(self, dataset_name,
-                                       pretty_response=True):
+                                       pretty_response=False):
         """
         description: This method check from time to time using Time lib, if a
         dataset has finished being inserted
