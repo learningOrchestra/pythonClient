@@ -1,13 +1,8 @@
-"""
-
-"""
 __author__ = "Otavio Henrique Rodrigues Mapa & Matheus Goncalves Ribeiro"
 __credits__ = "all free source developers"
 __status__ = "Prototype"
 
-import requests
 import json
-import time
 
 
 class ResponseTreat:

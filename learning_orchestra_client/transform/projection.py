@@ -106,8 +106,8 @@ class Projection:
         """
         dataset_metadata = self.search_projections_content(dataset_name,
                                                            limit=1)
-        fields_to_insert = dataset_metadata.get('result')[self.METADATA_INDEX]\
-                                           .get('fields')
+        fields_to_insert = dataset_metadata.get('result')[self.METADATA_INDEX] \
+            .get('fields')
         for field in fields_to_delete:
             fields_to_insert.remove(field)
         response = self.insert_dataset_attributes_sync(dataset_name,
@@ -137,8 +137,8 @@ class Projection:
         """
         dataset_metadata = self.search_projections_content(dataset_name,
                                                            limit=1)
-        fields_to_insert = dataset_metadata.get('result')[self.METADATA_INDEX]\
-                                           .get('fields')
+        fields_to_insert = dataset_metadata.get('result')[self.METADATA_INDEX] \
+            .get('fields')
         for field in fields_to_delete:
             fields_to_insert.remove(field)
         response = self.insert_dataset_attributes_async(dataset_name,
@@ -199,9 +199,9 @@ class Projection:
         """
 
         cluster_url_projection = self.cluster_url + "/" + projection_name + \
-                                                    "?query=" + str(query) + \
-                                                    "&limit=" + str(limit) + \
-                                                    "&skip=" + str(skip)
+                                 "?query=" + str(query) + \
+                                 "&limit=" + str(limit) + \
+                                 "&skip=" + str(skip)
         response = requests.get(cluster_url_projection)
         return self.response_treat.treatment(response, pretty_response)
 
