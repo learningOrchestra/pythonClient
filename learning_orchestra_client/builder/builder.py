@@ -61,11 +61,9 @@ class Builder:
         }
         response = requests.post(url=self.cluster_url,
                                  json=request_body_content)
-
-        self.verify_model_processing_done(train_dataset_name,
-                                          pretty_response=pretty_response)
-        self.verify_model_processing_done(test_dataset_name,
-                                          pretty_response=pretty_response)
+        for i in model_classifier:
+            self.verify_model_processing_done(test_dataset_name+i,
+                                              pretty_response=pretty_response)
 
         return self.response_treat.treatment(response, pretty_response)
 

@@ -28,9 +28,9 @@ class Dataset:
         return: A JSON object with an error or warning message or a URL
         indicating the correct operation.
         """
-        cluster_url_dataset = self.cluster_url
+        request_url = self.cluster_url
         request_body = {"datasetName": dataset_name, "url": url}
-        response = requests.post(url=cluster_url_dataset, json=request_body)
+        response = requests.post(url=request_url, json=request_body)
         self.verify_dataset_processing_done(dataset_name, pretty_response)
         if pretty_response:
             print("\n----------" + " CREATED FILE " + dataset_name + " -------"
@@ -53,9 +53,9 @@ class Dataset:
         indicating the correct operation (the caller must use such an URL to
         proceed future checks to verify if the dataset is inserted).
         """
-        cluster_url_dataset = self.cluster_url
+        request_url = self.cluster_url
         request_body = {"datasetName": dataset_name, "url": url}
-        response = requests.post(url=cluster_url_dataset, json=request_body)
+        response = requests.post(url=request_url, json=request_body)
         print("\n----------" + " CREATE FILE " + dataset_name + " ----------")
         return self.response_treat.treatment(response, pretty_response)
 
@@ -69,8 +69,8 @@ class Dataset:
         return: All datasets metadata stored in Learning Orchestra or an empty
         result.
         """
-        cluster_url_dataset = self.cluster_url
-        response = requests.get(cluster_url_dataset)
+        request_url = self.cluster_url
+        response = requests.get(request_url)
         return self.response_treat.treatment(response, pretty_response)
 
     def search_dataset(self, dataset_name, pretty_response=False):
@@ -109,11 +109,11 @@ class Dataset:
         future content requests.
         """
 
-        cluster_url_dataset = self.cluster_url + "/" + dataset_name + \
+        request_url = self.cluster_url + "/" + dataset_name + \
                                                  "?query=" + str(query) + \
                                                  "&limit=" + str(limit) + \
                                                  "&skip=" + str(skip)
-        response = requests.get(cluster_url_dataset)
+        response = requests.get(request_url)
         return self.response_treat.treatment(response, pretty_response)
 
     def delete_dataset(self, dataset_name, pretty_response=False):
@@ -130,8 +130,8 @@ class Dataset:
         return: JSON object with an error message, a warning message or a
         correct delete message
         """
-        cluster_url_dataset = self.cluster_url + "/" + dataset_name
-        response = requests.delete(cluster_url_dataset)
+        request_url = self.cluster_url + "/" + dataset_name
+        response = requests.delete(request_url)
         return self.response_treat.treatment(response, pretty_response)
 
     def verify_dataset_processing_done(self, dataset_name,
