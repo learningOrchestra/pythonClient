@@ -5,10 +5,6 @@ from dataset.dataset import Dataset
 
 
 class Builder:
-    """
-
-    """
-
     def __init__(self, ip_from_cluster):
         self.cluster_url = "http://" + ip_from_cluster + \
                            "/api/learningOrchestra/v1/builder"
