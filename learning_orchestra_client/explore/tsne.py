@@ -123,6 +123,7 @@ class Tsne:
 
         return: A link to an image plot or open an image plot.
         """
+        cluster_url_tsne = self.cluster_url + "/" + tsne_name
         if pretty_response:
             print(
                 "\n----------"
@@ -131,8 +132,6 @@ class Tsne:
                 + " tsne IMAGE PLOT "
                 + " ----------"
             )
-        cluster_url_tsne = self.cluster_url + "/" + tsne_name
-        if pretty_response:
             img = Image.open(requests.get(cluster_url_tsne, stream=True).raw)
             img.show()
         else:
@@ -183,7 +182,7 @@ class Tsne:
                                                       "---")
         while True:
             time.sleep(self.WAIT_TIME)
-            response = self.search_tsne(tsne_name)
+            response = self.verify_tsne_exist(tsne_name)
             if response:
                 break
             continue

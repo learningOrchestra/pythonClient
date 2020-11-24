@@ -119,6 +119,7 @@ class Pca:
 
         return: A link to an image plot or open an image plot.
         """
+        cluster_url_pca = self.cluster_url + "/" + pca_name
         if pretty_response:
             print(
                 "\n----------"
@@ -127,8 +128,6 @@ class Pca:
                 + " PCA IMAGE PLOT "
                 + " ----------"
             )
-        cluster_url_pca = self.cluster_url + "/" + pca_name
-        if pretty_response:
             img = Image.open(requests.get(cluster_url_pca, stream=True).raw)
             img.show()
         else:
@@ -179,7 +178,7 @@ class Pca:
                                                      "---")
         while True:
             time.sleep(self.WAIT_TIME)
-            response = self.search_pca(pca_name)
+            response = self.verify_pca_exist(pca_name)
             if response:
                 break
             continue
