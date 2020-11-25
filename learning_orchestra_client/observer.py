@@ -13,6 +13,7 @@ class Observer:
         """
         :description: Changes the dataset name used in object.
         :param dataset_name: Name of dataset to observe.
+
         :return: None.
         """
         self.dataset_name = dataset_name
@@ -20,6 +21,7 @@ class Observer:
     def get_dataset_name(self):
         """
         :description: Retrieve the dataset name used in object.
+
         :return: The dataset name.
         """
         return self.dataset_name
@@ -28,6 +30,7 @@ class Observer:
         """
         :description: Observe the finished processing status from some
         processing, blocking the code execution until finish processing.
+
         :return: A dict with metadata file of used dataset name.
         """
         observer_query = [
@@ -46,6 +49,7 @@ class Observer:
     def observe_storage(self):
         """
         :description: Get all changes from a dataset
+
         :return: A pymongo CollectionChangeStream object, use the builtin
         next() method to iterate over changes.
         """
