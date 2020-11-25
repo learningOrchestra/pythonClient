@@ -33,6 +33,14 @@ class Observer:
 
         :return: A dict with metadata file of used dataset name.
         """
+
+        dataset_collection = self.database[self.dataset_name]
+        metadata_query = {"_id": 0}
+        dataset_metadata = dataset_collection.find_one(metadata_query)
+
+        if dataset_metadata["finished"]:
+            return dataset_metadata
+
         observer_query = [
             {'$match': {
                 '$and':
@@ -42,9 +50,9 @@ class Observer:
                     ]
             }}
         ]
-        return self.database[self.dataset_name].watch(
+        return dataset_collection.watch(
             observer_query,
-            full_document='updateLookup').next()
+            full_document='updateLookup').next()['fullDocument']
 
     def observe_storage(self):
         """
