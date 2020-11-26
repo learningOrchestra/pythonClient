@@ -1,3 +1,4 @@
+from observer import Observer
 from response_treat import ResponseTreat
 from dataset.dataset import Dataset
 import requests
@@ -5,6 +6,7 @@ import requests
 
 class DataType:
     def __init__(self, ip_from_cluster):
+        self.CLUSTER_IP = ip_from_cluster
         self.cluster_url = "http://" + ip_from_cluster + \
                            "/api/learningOrchestra/v1/transform/dataType"
         self.ResponseTreat = ResponseTreat()
@@ -22,8 +24,8 @@ class DataType:
 
         return: A JSON object with error or warning messages.
         """
-        self.Dataset.verify_dataset_processing_done(dataset_name,
-                                                    pretty_response)
+        Observer(dataset_name, self.CLUSTER_IP).observe_processing(
+                 pretty_response)
         url_request = self.cluster_url
         body_request = {
             self.INPUT_NAME: dataset_name,

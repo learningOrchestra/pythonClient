@@ -2,18 +2,19 @@ __author__ = "Otavio Henrique Rodrigues Mapa & Matheus Goncalves Ribeiro"
 __credits__ = "all free source developers"
 __status__ = "Prototype"
 
+from observer import Observer
 from response_treat import ResponseTreat
 import requests
-import time
 
 
 class Dataset:
     def __init__(self, ip_from_cluster):
         self.cluster_url = "http://" + ip_from_cluster + \
                            "/api/learningOrchestra/v1/dataset"
-        self.WAIT_TIME = 3
-        self.METADATA_INDEX = 0
         self.response_treat = ResponseTreat()
+        self.OUTPUT_NAME = "datasetName"
+        self.URL = "datasetURI"
+        self.CLUSTER_IP = ip_from_cluster
 
     def insert_dataset_sync(self, dataset_name, url, pretty_response=False):
         """
@@ -29,9 +30,10 @@ class Dataset:
         indicating the correct operation.
         """
         request_url = self.cluster_url
-        request_body = {"datasetName": dataset_name, "url": url}
+        request_body = {self.OUTPUT_NAME: dataset_name,
+                        self.URL: url}
         response = requests.post(url=request_url, json=request_body)
-        self.verify_dataset_processing_done(dataset_name, pretty_response)
+        Observer(dataset_name, self.CLUSTER_IP).observe_processing()
         if pretty_response:
             print("\n----------" + " CREATED FILE " + dataset_name + " -------"
                                                                      "---")
@@ -54,9 +56,12 @@ class Dataset:
         proceed future checks to verify if the dataset is inserted).
         """
         request_url = self.cluster_url
-        request_body = {"datasetName": dataset_name, "url": url}
+        request_body = {self.OUTPUT_NAME: dataset_name,
+                        self.URL: url}
         response = requests.post(url=request_url, json=request_body)
-        print("\n----------" + " CREATE FILE " + dataset_name + " ----------")
+        if pretty_response:
+            print("\n----------" + " CREATED FILE " + dataset_name + " -------"
+                                                                     "---")
         return self.response_treat.treatment(response, pretty_response)
 
     def search_all_datasets(self, pretty_response=False):
@@ -110,9 +115,9 @@ class Dataset:
         """
 
         request_url = self.cluster_url + "/" + dataset_name + \
-                                                 "?query=" + str(query) + \
-                                                 "&limit=" + str(limit) + \
-                                                 "&skip=" + str(skip)
+                                         "?query=" + str(query) + \
+                                         "&limit=" + str(limit) + \
+                                         "&skip=" + str(skip)
         response = requests.get(request_url)
         return self.response_treat.treatment(response, pretty_response)
 
@@ -133,23 +138,3 @@ class Dataset:
         request_url = self.cluster_url + "/" + dataset_name
         response = requests.delete(request_url)
         return self.response_treat.treatment(response, pretty_response)
-
-    def verify_dataset_processing_done(self, dataset_name,
-                                       pretty_response=False):
-        """
-        description: This method check from time to time using Time lib, if a
-        dataset has finished being inserted
-        into the Learning Orchestra storage mechanism.
-
-        pretty_response: If true return indented string, else return dict.
-        """
-        if pretty_response:
-            print("\n---------- WAITING " + dataset_name + " FINISH ----------")
-        while True:
-            time.sleep(self.WAIT_TIME)
-            response = self.search_dataset_content(dataset_name, limit=1,
-                                                   pretty_response=False)
-            if len(response["result"]) == 0:
-                continue
-            if response["result"][self.METADATA_INDEX]["finished"]:
-                break

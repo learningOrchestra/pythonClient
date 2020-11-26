@@ -1,8 +1,9 @@
-import requests
-import time
+from observer import Observer
 from response_treat import ResponseTreat
 from dataset.dataset import Dataset
 from PIL import Image
+import requests
+import time
 
 
 class Tsne:
@@ -15,7 +16,7 @@ class Tsne:
         self.LABEL = "label"
         self.dataset = Dataset(ip_from_cluster)
         self.WAIT_TIME = 3
-        self.METADATA_INDEX = 0
+        self.CLUSTER_IP = ip_from_cluster
 
     def run_tsne_sync(self, dataset_name, tsne_name, label,
                       pretty_response=False):
@@ -39,16 +40,15 @@ class Tsne:
             self.OUTPUT_NAME: tsne_name,
             self.LABEL: label,
         }
-        self.dataset.verify_dataset_processing_done(dataset_name,
-                                                    pretty_response)
+        Observer(dataset_name, self.CLUSTER_IP).observe_processing(
+                 pretty_response)
         request_url = self.cluster_url
         response = requests.post(url=request_url, json=request_body)
-        self.verify_tsne_processing_done(tsne_name,
-                                         pretty_response=pretty_response)
+        self.verify_tsne_exist(tsne_name, pretty_response)
         if pretty_response:
             print(
                 "\n----------"
-                + " CREATE PCA IMAGE PLOT FROM "
+                + " CREATE TSNE IMAGE PLOT FROM "
                 + dataset_name
                 + " TO "
                 + tsne_name
@@ -80,8 +80,8 @@ class Tsne:
             self.OUTPUT_NAME: tsne_name,
             self.LABEL: label,
         }
-        self.dataset.verify_dataset_processing_done(dataset_name,
-                                                    pretty_response)
+        Observer(dataset_name, self.CLUSTER_IP).observe_processing(
+                 pretty_response)
         request_url = self.cluster_url
         response = requests.post(url=request_url, json=request_body)
         if pretty_response:
@@ -149,7 +149,7 @@ class Tsne:
         response = requests.delete(cluster_url_tsne)
         return self.response_treat.treatment(response, pretty_response)
 
-    def verify_tsne_exist(self, tsne_name):
+    def verify_tsne_exist(self, tsne_name, pretty_response=False):
         """
         description: This method is responsible to verify if a t_SNE image
         exist into the Learning Orchestra storage mechanism.
@@ -158,27 +158,12 @@ class Tsne:
 
         return: True if the t_SNE requested exist, false if does not.
         """
-        all_tsne = self.search_all_tsne()
-        tsne_name += ".png"
-        return tsne_name in all_tsne.get('result')
-
-    def verify_tsne_processing_done(self, tsne_name,
-                                    pretty_response=False):
-        """
-        description: This method check from time to time using Time lib, if a
-        projection has finished being inserted into the Learning Orchestra
-        storage mechanism.
-
-        tsne_name: Name of t_SNE image plot.
-        pretty_response: If true return indented string, else return dict.
-        """
         if pretty_response:
-            print(
-                "\n---------- WAITING " + tsne_name + " FINISH -------"
-                                                      "---")
-        while True:
+            print("\n---------- CHECKING IF " + tsne_name + " FINISHED "
+                                                            "----------")
+        exist = False
+        tsne_name += ".png"
+        while not exist:
             time.sleep(self.WAIT_TIME)
-            response = self.verify_tsne_exist(tsne_name)
-            if response:
-                break
-            continue
+            all_tsne = self.search_all_tsne()
+            exist = tsne_name in all_tsne.get('result')

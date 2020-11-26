@@ -1,17 +1,14 @@
-import time
-
-import requests
-
+from observer import Observer
 from response_treat import ResponseTreat
 from dataset.dataset import Dataset
+import requests
 
 
 class Histogram:
     def __init__(self, ip_from_cluster):
+        self.CLUSTER_IP = ip_from_cluster
         self.cluster_url = "http://" + ip_from_cluster + \
                            "/api/learningOrchestra/v1/explore/histogram"
-        self.WAIT_TIME = 3
-        self.METADATA_INDEX = 0
         self.response_treat = ResponseTreat()
         self.INPUT_NAME = "inputDatasetName"
         self.OUTPUT_NAME = "outputDatasetName"
@@ -38,11 +35,12 @@ class Histogram:
             self.OUTPUT_NAME: histogram_name,
             self.FIELDS: fields,
         }
-        self.dataset.verify_dataset_processing_done(dataset_name,
-                                                    pretty_response)
+        Observer(dataset_name, self.CLUSTER_IP).observe_processing(
+                 pretty_response)
         request_url = self.cluster_url
         response = requests.post(url=request_url, json=request_body)
-        self.verify_dataset_histogram_done(histogram_name, pretty_response)
+        Observer(histogram_name, self.CLUSTER_IP).observe_processing(
+            pretty_response)
         if pretty_response:
             print(
                 "\n----------"
@@ -76,8 +74,8 @@ class Histogram:
             self.OUTPUT_NAME: histogram_name,
             self.FIELDS: fields,
         }
-        self.dataset.verify_dataset_processing_done(dataset_name,
-                                                    pretty_response)
+        Observer(dataset_name, self.CLUSTER_IP).observe_processing(
+                 pretty_response)
         request_url = self.cluster_url
         response = requests.post(url=request_url, json=request_body)
         if pretty_response:
@@ -129,28 +127,6 @@ class Histogram:
                                                    "&skip=" + str(skip)
         response = requests.get(cluster_url_histogram)
         return self.response_treat.treatment(response, pretty_response)
-
-    def verify_dataset_histogram_done(self, histogram_name,
-                                      pretty_response=True):
-        """
-        description: This method check from time to time using Time lib, if a
-        histogram has finished being inserted into the Learning Orchestra
-        storage mechanism.
-
-        histogram_name: Represents the histogram name.
-        pretty_response: If true return indented string, else return dict.
-        """
-        if pretty_response:
-            print(
-                "\n---------- WAITING " + histogram_name + " FINISH ----------")
-        while True:
-            time.sleep(self.WAIT_TIME)
-            response = self.search_histogram_data(histogram_name, limit=1,
-                                                  pretty_response=False)
-            if len(response["result"]) == 0:
-                continue
-            if response["result"][self.METADATA_INDEX]["finished"]:
-                break
 
     def delete_histogram(self, histogram_name, pretty_response=False):
         """

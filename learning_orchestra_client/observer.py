@@ -26,14 +26,16 @@ class Observer:
         """
         return self.dataset_name
 
-    def observe_processing(self):
+    def observe_processing(self, pretty_response=False):
         """
         :description: Observe the finished processing status from some
         processing, blocking the code execution until finish processing.
 
         :return: A dict with metadata file of used dataset name.
         """
-
+        if pretty_response:
+            print("\n---------- CHECKING IF " + self.dataset_name + " FINISHED "
+                  "----------")
         dataset_collection = self.database[self.dataset_name]
         metadata_query = {"_id": 0}
         dataset_metadata = dataset_collection.find_one(metadata_query)

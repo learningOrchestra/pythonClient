@@ -1,5 +1,8 @@
-import requests
 import time
+
+import requests
+
+from observer import Observer
 from response_treat import ResponseTreat
 from dataset.dataset import Dataset
 from PIL import Image
@@ -15,7 +18,7 @@ class Pca:
         self.LABEL = "label"
         self.dataset = Dataset(ip_from_cluster)
         self.WAIT_TIME = 3
-        self.METADATA_INDEX = 0
+        self.CLUSTER_IP = ip_from_cluster
 
     def run_pca_sync(self, dataset_name, pca_name, label,
                      pretty_response=False):
@@ -39,12 +42,11 @@ class Pca:
             self.OUTPUT_NAME: pca_name,
             self.LABEL: label,
         }
-        self.dataset.verify_dataset_processing_done(dataset_name,
-                                                    pretty_response)
+        Observer(dataset_name, self.CLUSTER_IP).observe_processing(
+            pretty_response)
         request_url = self.cluster_url
         response = requests.post(url=request_url, json=request_body)
-        self.verify_pca_processing_done(pca_name,
-                                        pretty_response=pretty_response)
+        self.verify_pca_exist(pca_name, pretty_response)
         if pretty_response:
             print(
                 "\n----------"
@@ -80,8 +82,8 @@ class Pca:
             self.OUTPUT_NAME: pca_name,
             self.LABEL: label,
         }
-        self.dataset.verify_dataset_processing_done(dataset_name,
-                                                    pretty_response)
+        Observer(dataset_name, self.CLUSTER_IP).observe_processing(
+            pretty_response)
         request_url = self.cluster_url
         response = requests.post(url=request_url, json=request_body)
         if pretty_response:
@@ -123,7 +125,7 @@ class Pca:
         if pretty_response:
             print(
                 "\n----------"
-                + " READ"
+                + " READ "
                 + pca_name
                 + " PCA IMAGE PLOT "
                 + " ----------"
@@ -149,7 +151,7 @@ class Pca:
         response = requests.delete(cluster_url_pca)
         return self.response_treat.treatment(response, pretty_response)
 
-    def verify_pca_exist(self, pca_name):
+    def verify_pca_exist(self, pca_name, pretty_response=False):
         """
         description: This method is responsible to verify if a PCA image
         exist into the Learning Orchestra storage mechanism.
@@ -158,27 +160,12 @@ class Pca:
 
         return: True if the PCA requested exist, false if does not.
         """
-        all_pca = self.search_all_pca()
-        pca_name += ".png"
-        return pca_name in all_pca.get('result')
-
-    def verify_pca_processing_done(self, pca_name,
-                                   pretty_response=False):
-        """
-        description: This method check from time to time using Time lib, if a
-        projection has finished being inserted into the Learning Orchestra
-        storage mechanism.
-
-        pca_name: Name of PCA image plot.
-        pretty_response: If true return indented string, else return dict.
-        """
         if pretty_response:
-            print(
-                "\n---------- WAITING " + pca_name + " FINISH -------"
-                                                     "---")
-        while True:
+            print("\n---------- CHECKING IF " + pca_name + " FINISHED "
+                                                           "----------")
+        exist = False
+        pca_name += ".png"
+        while not exist:
             time.sleep(self.WAIT_TIME)
-            response = self.verify_pca_exist(pca_name)
-            if response:
-                break
-            continue
+            all_pca = self.search_all_pca()
+            exist = pca_name in all_pca.get('result')
