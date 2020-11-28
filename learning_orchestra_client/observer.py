@@ -40,6 +40,10 @@ class Observer:
         metadata_query = {"_id": 0}
         dataset_metadata = dataset_collection.find_one(metadata_query)
 
+        if dataset_metadata is None:
+            print("Dataset name invalid")
+            exit()
+
         if dataset_metadata["finished"]:
             return dataset_metadata
 
