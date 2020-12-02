@@ -31,17 +31,19 @@ class Projection:
         return: A JSON object with error or warning messages. In case of
         success, it returns the projection metadata.
         """
+
         request_body = {
             self.INPUT_NAME: dataset_name,
             self.OUTPUT_NAME: projection_name,
             self.FIELDS: fields,
         }
-        Observer(dataset_name, self.CLUSTER_IP).observe_processing(
-                 pretty_response)
         request_url = self.cluster_url
+
         response = requests.post(url=request_url, json=request_body)
+
         Observer(projection_name, self.CLUSTER_IP).observe_processing(
                  pretty_response)
+
         if pretty_response:
             print(
                 "\n----------"
@@ -51,6 +53,7 @@ class Projection:
                 + projection_name
                 + " ----------"
             )
+
         return self.response_treat.treatment(response, pretty_response)
 
     def insert_dataset_attributes_async(self, dataset_name, projection_name,
@@ -70,15 +73,16 @@ class Projection:
         return: A JSON object with error or warning messages. In case of
         success, it returns the projection metadata.
         """
+
         request_body = {
             self.INPUT_NAME: dataset_name,
             self.OUTPUT_NAME: projection_name,
             self.FIELDS: fields,
         }
-        Observer(dataset_name, self.CLUSTER_IP).observe_processing(
-                 pretty_response)
         request_url = self.cluster_url
+
         response = requests.post(url=request_url, json=request_body)
+
         if pretty_response:
             print(
                 "\n----------"
@@ -88,6 +92,7 @@ class Projection:
                 + projection_name
                 + " ----------"
             )
+
         return self.response_treat.treatment(response, pretty_response)
 
     def delete_dataset_attributes_sync(self, dataset_name, projection_name,
@@ -107,14 +112,17 @@ class Projection:
         """
         dataset_metadata = self.search_projections_content(dataset_name,
                                                            limit=1)
+
         fields_to_insert = dataset_metadata.get('result')[self.METADATA_INDEX] \
             .get('fields')
         for field in fields_to_delete:
             fields_to_insert.remove(field)
+
         response = self.insert_dataset_attributes_sync(dataset_name,
                                                        projection_name,
                                                        fields_to_insert,
                                                        pretty_response)
+
         return response
 
     def delete_dataset_attributes_async(self, dataset_name,
@@ -138,14 +146,17 @@ class Projection:
         """
         dataset_metadata = self.search_projections_content(dataset_name,
                                                            limit=1)
+
         fields_to_insert = dataset_metadata.get('result')[self.METADATA_INDEX] \
             .get('fields')
         for field in fields_to_delete:
             fields_to_insert.remove(field)
+
         response = self.insert_dataset_attributes_async(dataset_name,
                                                         projection_name,
                                                         fields_to_insert,
                                                         pretty_response)
+
         return response
 
     def search_all_projections(self, pretty_response=False):
@@ -159,7 +170,9 @@ class Projection:
         Orchestra or an empty result.
         """
         cluster_url_projection = self.cluster_url
+
         response = requests.get(cluster_url_projection)
+
         return self.response_treat.treatment(response, pretty_response)
 
     def search_projections(self, projection_name, pretty_response=False):
@@ -177,8 +190,10 @@ class Projection:
         error if there is no such projections.
         """
         pretty = pretty_response
+
         response = self.search_projections_content(projection_name, limit=1,
                                                    pretty_response=pretty)
+
         return response
 
     def search_projections_content(self, projection_name, query={}, limit=10,
@@ -203,7 +218,9 @@ class Projection:
                                                     "?query=" + str(query) + \
                                                     "&limit=" + str(limit) + \
                                                     "&skip=" + str(skip)
+
         response = requests.get(cluster_url_projection)
+
         return self.response_treat.treatment(response, pretty_response)
 
     def delete_projections(self, projection_name, pretty_response=False):
@@ -221,5 +238,7 @@ class Projection:
         correct delete message
         """
         cluster_url_projection = self.cluster_url + "/" + projection_name
+
         response = requests.delete(cluster_url_projection)
+
         return self.response_treat.treatment(response, pretty_response)

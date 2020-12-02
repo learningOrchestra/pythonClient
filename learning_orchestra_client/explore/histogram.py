@@ -30,17 +30,19 @@ class Histogram:
         return: A JSON object with error or warning messages. In case of
         success, it returns a histogram.
         """
+
         request_body = {
             self.INPUT_NAME: dataset_name,
             self.OUTPUT_NAME: histogram_name,
             self.FIELDS: fields,
         }
-        Observer(dataset_name, self.CLUSTER_IP).observe_processing(
-                 pretty_response)
         request_url = self.cluster_url
+
         response = requests.post(url=request_url, json=request_body)
+
         Observer(histogram_name, self.CLUSTER_IP).observe_processing(
             pretty_response)
+
         if pretty_response:
             print(
                 "\n----------"
@@ -50,6 +52,7 @@ class Histogram:
                 + histogram_name
                 + " ----------"
             )
+
         return self.response_treat.treatment(response, pretty_response)
 
     def run_histogram_async(self, dataset_name, histogram_name, fields,
@@ -69,15 +72,16 @@ class Histogram:
         return: A JSON object with error or warning messages. In case of
         success, it returns a histogram.
         """
+
         request_body = {
             self.INPUT_NAME: dataset_name,
             self.OUTPUT_NAME: histogram_name,
             self.FIELDS: fields,
         }
-        Observer(dataset_name, self.CLUSTER_IP).observe_processing(
-                 pretty_response)
         request_url = self.cluster_url
+
         response = requests.post(url=request_url, json=request_body)
+
         if pretty_response:
             print(
                 "\n----------"
@@ -87,6 +91,7 @@ class Histogram:
                 + histogram_name
                 + " ----------"
             )
+
         return self.response_treat.treatment(response, pretty_response)
 
     def search_all_histograms(self, pretty_response=False):
@@ -99,8 +104,11 @@ class Histogram:
         return: A list with all histogram names stored in Learning Orchestra
         or an empty result.
         """
+
         cluster_url_histogram = self.cluster_url
+
         response = requests.get(cluster_url_histogram)
+
         return self.response_treat.treatment(response, pretty_response)
 
     def search_histogram_data(self, histogram_name, query={}, limit=10, skip=0,
@@ -125,7 +133,9 @@ class Histogram:
                                                    "?query=" + str(query) + \
                                                    "&limit=" + str(limit) + \
                                                    "&skip=" + str(skip)
+
         response = requests.get(cluster_url_histogram)
+
         return self.response_treat.treatment(response, pretty_response)
 
     def delete_histogram(self, histogram_name, pretty_response=False):
@@ -140,6 +150,9 @@ class Histogram:
         return: JSON object with an error message, a warning message or a
         correct delete message
         """
+
         cluster_url_histogram = self.cluster_url + "/" + histogram_name
+
         response = requests.delete(cluster_url_histogram)
+
         return self.response_treat.treatment(response, pretty_response)

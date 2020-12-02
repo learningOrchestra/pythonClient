@@ -1,4 +1,3 @@
-from observer import Observer
 from response_treat import ResponseTreat
 from dataset.dataset import Dataset
 import requests
@@ -24,12 +23,13 @@ class DataType:
 
         return: A JSON object with error or warning messages.
         """
-        Observer(dataset_name, self.CLUSTER_IP).observe_processing(
-                 pretty_response)
+
         url_request = self.cluster_url
         body_request = {
             self.INPUT_NAME: dataset_name,
             self.TYPES: fields_change
         }
+
         response = requests.patch(url=url_request, json=body_request)
+
         return self.ResponseTreat.treatment(response, pretty_response)

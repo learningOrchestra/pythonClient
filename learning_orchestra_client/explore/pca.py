@@ -1,11 +1,8 @@
-import time
-
-import requests
-
-from observer import Observer
 from response_treat import ResponseTreat
 from dataset.dataset import Dataset
 from PIL import Image
+import requests
+import time
 
 
 class Pca:
@@ -17,7 +14,7 @@ class Pca:
         self.OUTPUT_NAME = "outputPlotName"
         self.LABEL = "label"
         self.dataset = Dataset(ip_from_cluster)
-        self.WAIT_TIME = 3
+        self.WAIT_TIME = 5
         self.CLUSTER_IP = ip_from_cluster
 
     def run_pca_sync(self, dataset_name, pca_name, label,
@@ -42,11 +39,12 @@ class Pca:
             self.OUTPUT_NAME: pca_name,
             self.LABEL: label,
         }
-        Observer(dataset_name, self.CLUSTER_IP).observe_processing(
-            pretty_response)
         request_url = self.cluster_url
+
         response = requests.post(url=request_url, json=request_body)
+
         self.verify_pca_exist(pca_name, pretty_response)
+
         if pretty_response:
             print(
                 "\n----------"
@@ -56,6 +54,7 @@ class Pca:
                 + pca_name
                 + " ----------"
             )
+
         return self.response_treat.treatment(response, pretty_response)
 
     def run_pca_async(self, dataset_name, pca_name, label,
@@ -77,15 +76,16 @@ class Pca:
         return: A JSON object with error or warning messages. In case of
         success, it returns a PCA image plot.
         """
+
         request_body = {
             self.INPUT_NAME: dataset_name,
             self.OUTPUT_NAME: pca_name,
             self.LABEL: label,
         }
-        Observer(dataset_name, self.CLUSTER_IP).observe_processing(
-            pretty_response)
         request_url = self.cluster_url
+
         response = requests.post(url=request_url, json=request_body)
+
         if pretty_response:
             print(
                 "\n----------"
@@ -95,6 +95,7 @@ class Pca:
                 + pca_name
                 + " ----------"
             )
+
         return self.response_treat.treatment(response, pretty_response)
 
     def search_all_pca(self, pretty_response=False):
@@ -107,8 +108,11 @@ class Pca:
         return: A list with all PCAs plot names stored in Learning Orchestra
         or an empty result.
         """
+
         cluster_url_pca = self.cluster_url
+
         response = requests.get(cluster_url_pca)
+
         return self.response_treat.treatment(response, pretty_response)
 
     def search_pca_plot(self, pca_name, pretty_response=False):
@@ -121,7 +125,9 @@ class Pca:
 
         return: A link to an image plot or open an image plot.
         """
+
         cluster_url_pca = self.cluster_url + "/" + pca_name
+
         if pretty_response:
             print(
                 "\n----------"
@@ -147,8 +153,11 @@ class Pca:
         return: JSON object with an error message, a warning message or a
         correct delete message.
         """
+
         cluster_url_pca = self.cluster_url + "/" + pca_name
+
         response = requests.delete(cluster_url_pca)
+
         return self.response_treat.treatment(response, pretty_response)
 
     def verify_pca_exist(self, pca_name, pretty_response=False):
@@ -160,11 +169,14 @@ class Pca:
 
         return: True if the PCA requested exist, false if does not.
         """
+
         if pretty_response:
             print("\n---------- CHECKING IF " + pca_name + " FINISHED "
                                                            "----------")
+
         exist = False
         pca_name += ".png"
+
         while not exist:
             time.sleep(self.WAIT_TIME)
             all_pca = self.search_all_pca()

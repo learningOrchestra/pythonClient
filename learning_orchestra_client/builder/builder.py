@@ -15,7 +15,6 @@ class Builder:
         self.CODE = "modelingCode"
         self.CLASSIFIERS_LIST = "classifiersList"
         self.dataset = Dataset(ip_from_cluster)
-        self.WAIT_TIME = 3
         self.METADATA_INDEX = 0
 
     def run_builder_sync(self, train_dataset_name, test_dataset_name,
@@ -37,6 +36,7 @@ class Builder:
 
         return: Several model predictions.
         """
+
         if pretty_response:
             print(
                 "\n----------"
@@ -46,10 +46,7 @@ class Builder:
                 + test_dataset_name
                 + " ----------"
             )
-        Observer(train_dataset_name, self.CLUSTER_IP).observe_processing(
-                 pretty_response)
-        Observer(test_dataset_name, self.CLUSTER_IP).observe_processing(
-                 pretty_response)
+
         request_body_content = {
             self.TRAIN_NAME: train_dataset_name,
             self.TEST_NAME: test_dataset_name,
@@ -58,9 +55,12 @@ class Builder:
         }
         response = requests.post(url=self.cluster_url,
                                  json=request_body_content)
-        for i in model_classifier:
-            Observer(test_dataset_name+i, self.CLUSTER_IP).observe_processing(
-                pretty_response)
+
+        observer = Observer(test_dataset_name, self.CLUSTER_IP)
+
+        for model in model_classifier:
+            observer.set_dataset_name(test_dataset_name+model)
+            observer.observe_processing(pretty_response)
 
         return self.response_treat.treatment(response, pretty_response)
 
@@ -94,10 +94,7 @@ class Builder:
                 + test_dataset_name
                 + " ----------"
             )
-        Observer(train_dataset_name, self.CLUSTER_IP).observe_processing(
-            pretty_response)
-        Observer(test_dataset_name, self.CLUSTER_IP).observe_processing(
-            pretty_response)
+
         request_body_content = {
             self.TRAIN_NAME: train_dataset_name,
             self.TEST_NAME: test_dataset_name,
@@ -119,8 +116,11 @@ class Builder:
         return: A list with all model predictions metadata stored in Learning
         Orchestra or an empty result.
         """
+
         cluster_url_tsne = self.cluster_url
+
         response = requests.get(cluster_url_tsne)
+
         return self.response_treat.treatment(response, pretty_response)
 
     def search_model_prediction(self, model_name, query={}, limit=10, skip=0,
@@ -140,11 +140,14 @@ class Builder:
         is no such projection. The current page is also returned to be used in
         future content requests.
         """
+
         cluster_url_dataset = self.cluster_url + "/" + model_name + \
                                                  "?query=" + str(query) + \
                                                  "&limit=" + str(limit) + \
                                                  "&skip=" + str(skip)
+
         response = requests.get(cluster_url_dataset)
+
         return self.response_treat.treatment(response, pretty_response)
 
     def search_model(self, model_name, pretty_response=False):
@@ -163,6 +166,7 @@ class Builder:
         """
         response = self.search_model_prediction(model_name, limit=1,
                                                 pretty_response=pretty_response)
+
         return response
 
     def delete_model(self, model_name, pretty_response=False):
@@ -177,6 +181,9 @@ class Builder:
         return: JSON object with an error message, a warning message or a
         correct delete message
         """
+
         cluster_url_dataset = self.cluster_url + "/" + model_name
+
         response = requests.delete(cluster_url_dataset)
+
         return self.response_treat.treatment(response, pretty_response)

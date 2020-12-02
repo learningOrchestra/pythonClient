@@ -29,11 +29,14 @@ class Dataset:
         return: A JSON object with an error or warning message or a URL
         indicating the correct operation.
         """
-        request_url = self.cluster_url
         request_body = {self.OUTPUT_NAME: dataset_name,
                         self.URL: url}
+        request_url = self.cluster_url
+
         response = requests.post(url=request_url, json=request_body)
+
         Observer(dataset_name, self.CLUSTER_IP).observe_processing()
+
         if pretty_response:
             print("\n----------" + " CREATED FILE " + dataset_name + " -------"
                                                                      "---")
@@ -55,10 +58,12 @@ class Dataset:
         indicating the correct operation (the caller must use such an URL to
         proceed future checks to verify if the dataset is inserted).
         """
-        request_url = self.cluster_url
         request_body = {self.OUTPUT_NAME: dataset_name,
                         self.URL: url}
+        request_url = self.cluster_url
+
         response = requests.post(url=request_url, json=request_body)
+
         if pretty_response:
             print("\n----------" + " CREATED FILE " + dataset_name + " -------"
                                                                      "---")
@@ -75,7 +80,9 @@ class Dataset:
         result.
         """
         request_url = self.cluster_url
+
         response = requests.get(request_url)
+
         return self.response_treat.treatment(response, pretty_response)
 
     def search_dataset(self, dataset_name, pretty_response=False):
@@ -94,6 +101,7 @@ class Dataset:
         """
         response = self.search_dataset_content(dataset_name, limit=1,
                                                pretty_response=pretty_response)
+
         return response
 
     def search_dataset_content(self, dataset_name, query={}, limit=10, skip=0,
@@ -118,7 +126,9 @@ class Dataset:
                                          "?query=" + str(query) + \
                                          "&limit=" + str(limit) + \
                                          "&skip=" + str(skip)
+
         response = requests.get(request_url)
+
         return self.response_treat.treatment(response, pretty_response)
 
     def delete_dataset(self, dataset_name, pretty_response=False):
@@ -135,6 +145,9 @@ class Dataset:
         return: JSON object with an error message, a warning message or a
         correct delete message
         """
+
         request_url = self.cluster_url + "/" + dataset_name
+
         response = requests.delete(request_url)
+
         return self.response_treat.treatment(response, pretty_response)

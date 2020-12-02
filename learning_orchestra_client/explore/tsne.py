@@ -1,4 +1,3 @@
-from observer import Observer
 from response_treat import ResponseTreat
 from dataset.dataset import Dataset
 from PIL import Image
@@ -15,7 +14,7 @@ class Tsne:
         self.OUTPUT_NAME = "outputPlotName"
         self.LABEL = "label"
         self.dataset = Dataset(ip_from_cluster)
-        self.WAIT_TIME = 3
+        self.WAIT_TIME = 5
         self.CLUSTER_IP = ip_from_cluster
 
     def run_tsne_sync(self, dataset_name, tsne_name, label,
@@ -35,16 +34,18 @@ class Tsne:
         return: A JSON object with error or warning messages. In case of
         success, it returns a t_SNE image plot.
         """
+
         request_body = {
             self.INPUT_NAME: dataset_name,
             self.OUTPUT_NAME: tsne_name,
             self.LABEL: label,
         }
-        Observer(dataset_name, self.CLUSTER_IP).observe_processing(
-                 pretty_response)
         request_url = self.cluster_url
+
         response = requests.post(url=request_url, json=request_body)
+
         self.verify_tsne_exist(tsne_name, pretty_response)
+
         if pretty_response:
             print(
                 "\n----------"
@@ -75,15 +76,16 @@ class Tsne:
         return: A JSON object with error or warning messages. In case of
         success, it returns a t_SNE image plot.
         """
+
         request_body = {
             self.INPUT_NAME: dataset_name,
             self.OUTPUT_NAME: tsne_name,
             self.LABEL: label,
         }
-        Observer(dataset_name, self.CLUSTER_IP).observe_processing(
-                 pretty_response)
         request_url = self.cluster_url
+
         response = requests.post(url=request_url, json=request_body)
+
         if pretty_response:
             print(
                 "\n----------"
@@ -93,6 +95,7 @@ class Tsne:
                 + tsne_name
                 + " ----------"
             )
+
         return self.response_treat.treatment(response, pretty_response)
 
     def search_all_tsne(self, pretty_response=False):
@@ -105,8 +108,11 @@ class Tsne:
         return: A list with all t_SNEs plot names stored in Learning Orchestra
         or an empty result.
         """
+
         cluster_url_tsne = self.cluster_url
+
         response = requests.get(cluster_url_tsne)
+
         return self.response_treat.treatment(response, pretty_response)
 
     def search_tsne_plot(self, tsne_name, pretty_response=False):
@@ -119,7 +125,9 @@ class Tsne:
 
         return: A link to an image plot or open an image plot.
         """
+
         cluster_url_tsne = self.cluster_url + "/" + tsne_name
+
         if pretty_response:
             print(
                 "\n----------"
@@ -145,8 +153,11 @@ class Tsne:
         return: JSON object with an error message, a warning message or a
         correct delete message.
         """
+
         cluster_url_tsne = self.cluster_url + "/" + tsne_name
+
         response = requests.delete(cluster_url_tsne)
+
         return self.response_treat.treatment(response, pretty_response)
 
     def verify_tsne_exist(self, tsne_name, pretty_response=False):
@@ -158,9 +169,11 @@ class Tsne:
 
         return: True if the t_SNE requested exist, false if does not.
         """
+
         if pretty_response:
             print("\n---------- CHECKING IF " + tsne_name + " FINISHED "
                                                             "----------")
+
         exist = False
         tsne_name += ".png"
         while not exist:
