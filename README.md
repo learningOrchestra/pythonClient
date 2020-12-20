@@ -33,7 +33,12 @@ Each functionality in learningOrchestra is contained in its own class. Check the
 Shown below is an example usage of learning-orchestra-client using the [Titanic Dataset](https://www.kaggle.com/c/titanic/overview):
 
 ```python
-from learning_orchestra_client import *
+from learning_orchestra_client import (
+    dataset.dataset,
+    builder.builder,
+    transform.data_type,
+    transform.projection,
+)
 
 cluster_ip = "34.95.187.26"
 
