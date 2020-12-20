@@ -2,13 +2,14 @@ __author__ = "Otavio Henrique Rodrigues Mapa & Matheus Goncalves Ribeiro"
 __credits__ = "all free source developers"
 __status__ = "Prototype"
 
-from observer import Observer
-from response_treat import ResponseTreat
+from ..observer import Observer
+from ..response_treat import ResponseTreat
 import requests
+from typing import Union
 
 
 class Dataset:
-    def __init__(self, ip_from_cluster):
+    def __init__(self, ip_from_cluster: str):
         self.cluster_url = "http://" + ip_from_cluster + \
                            "/api/learningOrchestra/v1/dataset"
         self.response_treat = ResponseTreat()
@@ -16,7 +17,10 @@ class Dataset:
         self.URL = "datasetURI"
         self.CLUSTER_IP = ip_from_cluster
 
-    def insert_dataset_sync(self, dataset_name, url, pretty_response=False):
+    def insert_dataset_sync(self,
+                            dataset_name: str,
+                            url: str,
+                            pretty_response: bool = False) -> Union[dict, str]:
         """
         description: This method is responsible to insert a dataset from a URI
         synchronously, i.e., the caller waits until the dataset is inserted into
@@ -42,7 +46,11 @@ class Dataset:
                                                                      "---")
         return self.response_treat.treatment(response, pretty_response)
 
-    def insert_dataset_async(self, dataset_name, url, pretty_response=False):
+    def insert_dataset_async(self,
+                             dataset_name: str,
+                             url: str,
+                             pretty_response: bool = False) \
+            -> Union[dict, str]:
         """
         description: This method is responsible to insert a dataset from a URI
         asynchronously, i.e., the caller does not wait until the dataset is
@@ -69,7 +77,8 @@ class Dataset:
                                                                      "---")
         return self.response_treat.treatment(response, pretty_response)
 
-    def search_all_datasets(self, pretty_response=False):
+    def search_all_datasets(self, pretty_response: bool = False) \
+            -> Union[dict, str]:
         """
         description: This method retrieves all datasets metadata, i.e., it does
         not retrieve the dataset content.
@@ -85,7 +94,8 @@ class Dataset:
 
         return self.response_treat.treatment(response, pretty_response)
 
-    def search_dataset(self, dataset_name, pretty_response=False):
+    def search_dataset(self, dataset_name: str, pretty_response: bool = False) \
+            -> Union[dict, str]:
         """
         description: This method is responsible for retrieving a specific
         dataset
@@ -104,8 +114,13 @@ class Dataset:
 
         return response
 
-    def search_dataset_content(self, dataset_name, query={}, limit=10, skip=0,
-                               pretty_response=False):
+    def search_dataset_content(self,
+                               dataset_name: str,
+                               query: dict = {},
+                               limit: int = 10,
+                               skip: int = 0,
+                               pretty_response: bool = False) \
+            -> Union[dict, str]:
         """
         description:  This method is responsible for retrieving the dataset
         content
@@ -123,15 +138,16 @@ class Dataset:
         """
 
         request_url = self.cluster_url + "/" + dataset_name + \
-                                         "?query=" + str(query) + \
-                                         "&limit=" + str(limit) + \
-                                         "&skip=" + str(skip)
+                      "?query=" + str(query) + \
+                      "&limit=" + str(limit) + \
+                      "&skip=" + str(skip)
 
         response = requests.get(request_url)
 
         return self.response_treat.treatment(response, pretty_response)
 
-    def delete_dataset(self, dataset_name, pretty_response=False):
+    def delete_dataset(self, dataset_name, pretty_response=False) \
+            -> Union[dict, str]:
         """
         description: This method is responsible for deleting the dataset. The
         delete operation is always synchronous because it is very fast, since

@@ -1,15 +1,15 @@
-from pymongo import MongoClient
+from pymongo import MongoClient, change_stream
 
 
 class Observer:
-    def __init__(self, dataset_name, cluster_ip):
+    def __init__(self, dataset_name: str, cluster_ip: str):
         self.dataset_name = dataset_name
 
         mongo_url = 'mongodb://root:owl45%2321@' + cluster_ip
         mongo_client = MongoClient(mongo_url)
         self.database = mongo_client['database']
 
-    def set_dataset_name(self, dataset_name):
+    def set_dataset_name(self, dataset_name: str):
         """
         :description: Changes the dataset name used in object.
         :param dataset_name: Name of dataset to observe.
@@ -18,7 +18,7 @@ class Observer:
         """
         self.dataset_name = dataset_name
 
-    def get_dataset_name(self):
+    def get_dataset_name(self) -> str:
         """
         :description: Retrieve the dataset name used in object.
 
@@ -26,7 +26,7 @@ class Observer:
         """
         return self.dataset_name
 
-    def observe_processing(self, pretty_response=False):
+    def observe_processing(self, pretty_response: bool = False) -> dict:
         """
         :description: Observe the finished processing status from some
         processing, blocking the code execution until finish processing.
@@ -35,7 +35,7 @@ class Observer:
         """
         if pretty_response:
             print("\n---------- CHECKING IF " + self.dataset_name + " FINISHED "
-                  "----------")
+                                                                    "----------")
         dataset_collection = self.database[self.dataset_name]
         metadata_query = {"_id": 0}
         dataset_metadata = dataset_collection.find_one(metadata_query)
@@ -60,7 +60,7 @@ class Observer:
             observer_query,
             full_document='updateLookup').next()['fullDocument']
 
-    def observe_storage(self):
+    def observe_storage(self) -> change_stream.CollectionChangeStream:
         """
         :description: Get all changes from a dataset
 

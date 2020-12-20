@@ -1,6 +1,7 @@
-from response_treat import ResponseTreat
-from dataset.dataset import Dataset
+from ..response_treat import ResponseTreat
+from ..dataset.dataset import Dataset
 import requests
+from typing import Union
 
 
 class DataType:
@@ -13,13 +14,17 @@ class DataType:
         self.INPUT_NAME = "inputDatasetName"
         self.TYPES = "types"
 
-    def update_dataset_types(self, dataset_name, fields_change,
-                             pretty_response=False):
+    def update_dataset_types(self,
+                             dataset_name: str,
+                             fields_change: dict,
+                             pretty_response: bool = False) \
+            -> Union[dict, str]:
         """
         description: Change types of fields to number or string.
 
         dataset_name: Represents the dataset name.
-        fields_change: Fields to change with types.
+        fields_change: Fields to change with types. This is a dict with each
+        key:value being field:type
 
         return: A JSON object with error or warning messages.
         """

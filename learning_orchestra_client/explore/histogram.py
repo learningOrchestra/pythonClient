@@ -1,11 +1,12 @@
-from observer import Observer
-from response_treat import ResponseTreat
-from dataset.dataset import Dataset
+from ..observer import Observer
+from ..response_treat import ResponseTreat
+from ..dataset.dataset import Dataset
 import requests
+from typing import Union
 
 
 class Histogram:
-    def __init__(self, ip_from_cluster):
+    def __init__(self, ip_from_cluster: str):
         self.CLUSTER_IP = ip_from_cluster
         self.cluster_url = "http://" + ip_from_cluster + \
                            "/api/learningOrchestra/v1/explore/histogram"
@@ -15,8 +16,12 @@ class Histogram:
         self.FIELDS = "names"
         self.dataset = Dataset(ip_from_cluster)
 
-    def run_histogram_sync(self, dataset_name, histogram_name, fields,
-                           pretty_response=False):
+    def run_histogram_sync(self,
+                           dataset_name: str,
+                           histogram_name: str,
+                           fields: list,
+                           pretty_response: bool = False) \
+            -> Union[dict, str]:
         """
         description: This method run histogram algorithm to create a histogram
         synchronously, the caller waits until the histogram is inserted into
@@ -24,7 +29,7 @@ class Histogram:
 
         dataset_name: Represents the name of dataset.
         histogram_name: Represents the name of histogram.
-        fields: Represents the set of attributes.
+        fields: Represents a list of attributes.
         pretty_response: If true return indented string, else return dict.
 
         return: A JSON object with error or warning messages. In case of
@@ -55,8 +60,12 @@ class Histogram:
 
         return self.response_treat.treatment(response, pretty_response)
 
-    def run_histogram_async(self, dataset_name, histogram_name, fields,
-                            pretty_response=False):
+    def run_histogram_async(self,
+                            dataset_name: str,
+                            histogram_name: str,
+                            fields: list,
+                            pretty_response: bool = False) \
+            -> Union[dict, str]:
         """
         description: This method run histogram algorithm to create a histogram
         asynchronously, the caller does not wait until the histogram is
@@ -66,7 +75,7 @@ class Histogram:
 
         dataset_name: Represents the name of dataset.
         histogram_name: Represents the name of histogram.
-        fields: Represents the set of attributes.
+        fields: Represents a list of attributes.
         pretty_response: If true return indented string, else return dict.
 
         return: A JSON object with error or warning messages. In case of
@@ -94,7 +103,8 @@ class Histogram:
 
         return self.response_treat.treatment(response, pretty_response)
 
-    def search_all_histograms(self, pretty_response=False):
+    def search_all_histograms(self, pretty_response: bool = False) \
+            -> Union[dict, str]:
         """
         description: This method retrieves all histogram names, it does not
         retrieve the histogram content.
@@ -111,8 +121,13 @@ class Histogram:
 
         return self.response_treat.treatment(response, pretty_response)
 
-    def search_histogram_data(self, histogram_name, query={}, limit=10, skip=0,
-                              pretty_response=False):
+    def search_histogram_data(self,
+                              histogram_name: str,
+                              query: dict = {},
+                              limit: int = 10,
+                              skip: int = 0,
+                              pretty_response: bool = False) \
+            -> Union[dict, str]:
         """
         description: This method is responsible for retrieving the histogram
         content.
@@ -130,15 +145,16 @@ class Histogram:
         """
 
         cluster_url_histogram = self.cluster_url + "/" + histogram_name + \
-                                                   "?query=" + str(query) + \
-                                                   "&limit=" + str(limit) + \
-                                                   "&skip=" + str(skip)
+                                "?query=" + str(query) + \
+                                "&limit=" + str(limit) + \
+                                "&skip=" + str(skip)
 
         response = requests.get(cluster_url_histogram)
 
         return self.response_treat.treatment(response, pretty_response)
 
-    def delete_histogram(self, histogram_name, pretty_response=False):
+    def delete_histogram(self, histogram_name: str,
+                         pretty_response: bool = False) -> Union[dict, str]:
         """
         description: This method is responsible for deleting a histogram.
         The delete operation is always synchronous because it is very fast,

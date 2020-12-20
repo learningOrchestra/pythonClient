@@ -1,12 +1,13 @@
-from response_treat import ResponseTreat
-from dataset.dataset import Dataset
+from ..response_treat import ResponseTreat
+from ..dataset.dataset import Dataset
 from PIL import Image
 import requests
 import time
+from typing import Union
 
 
 class Pca:
-    def __init__(self, ip_from_cluster):
+    def __init__(self, ip_from_cluster: str):
         self.cluster_url = "http://" + ip_from_cluster + \
                            "/api/learningOrchestra/v1/explore/pca"
         self.response_treat = ResponseTreat()
@@ -17,8 +18,11 @@ class Pca:
         self.WAIT_TIME = 5
         self.CLUSTER_IP = ip_from_cluster
 
-    def run_pca_sync(self, dataset_name, pca_name, label,
-                     pretty_response=False):
+    def run_pca_sync(self,
+                     dataset_name: str,
+                     pca_name: str,
+                     label: str,
+                     pretty_response: bool = False) -> Union[dict, str]:
         """
         description: This method run PCA algorithm to create an image plot
         synchronously, the caller waits until the PCA image is inserted into
@@ -57,8 +61,11 @@ class Pca:
 
         return self.response_treat.treatment(response, pretty_response)
 
-    def run_pca_async(self, dataset_name, pca_name, label,
-                      pretty_response=False):
+    def run_pca_async(self,
+                      dataset_name: str,
+                      pca_name: str,
+                      label: str,
+                      pretty_response: bool = False) -> Union[dict, str]:
         """
         description: This method run PCA algorithm to create an image plot
         asynchronously, the caller does not wait until the PCA image is
@@ -98,7 +105,7 @@ class Pca:
 
         return self.response_treat.treatment(response, pretty_response)
 
-    def search_all_pca(self, pretty_response=False):
+    def search_all_pca(self, pretty_response: bool = False) -> Union[dict, str]:
         """
         description: This method retrieves all PCAs plot names, it does not
         retrieve the image plot.
@@ -115,7 +122,8 @@ class Pca:
 
         return self.response_treat.treatment(response, pretty_response)
 
-    def search_pca_plot(self, pca_name, pretty_response=False):
+    def search_pca_plot(self, pca_name: str, pretty_response: bool = False) \
+            -> Union[dict, str]:
         """
         description: This method retrieves a PCA image plot.
 
@@ -141,7 +149,8 @@ class Pca:
         else:
             return cluster_url_pca
 
-    def delete_pca_plot(self, pca_name, pretty_response=False):
+    def delete_pca_plot(self, pca_name: str, pretty_response: bool = False) \
+            -> Union[dict, str]:
         """
         description: This method is responsible for deleting the PCA image plot.
         The delete operation is always synchronous because it is very fast,
@@ -160,7 +169,8 @@ class Pca:
 
         return self.response_treat.treatment(response, pretty_response)
 
-    def verify_pca_exist(self, pca_name, pretty_response=False):
+    def verify_pca_exist(self, pca_name: str, pretty_response: bool = False) \
+            -> Union[dict, str]:
         """
         description: This method is responsible to verify if a PCA image
         exist into the Learning Orchestra storage mechanism.

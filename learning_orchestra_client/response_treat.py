@@ -10,7 +10,7 @@ class ResponseTreat:
     HTTP_SUCCESS = 200
     HTTP_ERROR = 500
 
-    def treatment(self, response, pretty_response=True):
+    def treatment(self, response, pretty_response: bool = True):
         """
         description: This method is responsible to return an indented json file
         or a dict.

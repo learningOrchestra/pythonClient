@@ -1,11 +1,12 @@
-from response_treat import ResponseTreat
-from dataset.dataset import Dataset
-from observer import Observer
+from ..response_treat import ResponseTreat
+from ..dataset.dataset import Dataset
+from ..observer import Observer
 import requests
+from typing import Union
 
 
 class Projection:
-    def __init__(self, ip_from_cluster):
+    def __init__(self, ip_from_cluster: str):
         self.cluster_url = "http://" + ip_from_cluster + \
                            "/api/learningOrchestra/v1/transform/projection"
         self.METADATA_INDEX = 0
@@ -16,8 +17,12 @@ class Projection:
         self.dataset = Dataset(ip_from_cluster)
         self.CLUSTER_IP = ip_from_cluster
 
-    def insert_dataset_attributes_sync(self, dataset_name, projection_name,
-                                       fields, pretty_response=False):
+    def insert_dataset_attributes_sync(self,
+                                       dataset_name: str,
+                                       projection_name: str,
+                                       fields: list,
+                                       pretty_response: bool = False) \
+            -> Union[dict, str]:
         """
         description: This method inserts a set of attributes into a dataset
         synchronously, the caller waits until the projection is inserted into
@@ -26,7 +31,8 @@ class Projection:
         pretty_response: If true return indented string, else return dict.
         projection_name: Represents the projection name.
         dataset_name: Represents the dataset name.
-        fields: Represents the set of attributes to be inserted.
+        fields: Represents the set of attributes to be inserted. This is list
+        with all attributes.
 
         return: A JSON object with error or warning messages. In case of
         success, it returns the projection metadata.
@@ -42,7 +48,7 @@ class Projection:
         response = requests.post(url=request_url, json=request_body)
 
         Observer(projection_name, self.CLUSTER_IP).observe_processing(
-                 pretty_response)
+            pretty_response)
 
         if pretty_response:
             print(
@@ -56,8 +62,12 @@ class Projection:
 
         return self.response_treat.treatment(response, pretty_response)
 
-    def insert_dataset_attributes_async(self, dataset_name, projection_name,
-                                        fields, pretty_response=False):
+    def insert_dataset_attributes_async(self,
+                                        dataset_name: str,
+                                        projection_name: str,
+                                        fields: list,
+                                        pretty_response: bool = False) \
+            -> Union[dict, str]:
         """
         description: This method inserts a set of attributes into a dataset
         asynchronously, the caller does not wait until the projections is
@@ -68,7 +78,8 @@ class Projection:
         pretty_response: If true return indented string, else return dict.
         projection_name: Represents the projection name.
         dataset_name: Represents the dataset name.
-        fields: Represents the set of attributes to be inserted.
+        fields: Represents the set of attributes to be inserted. This is list
+        with all attributes.
 
         return: A JSON object with error or warning messages. In case of
         success, it returns the projection metadata.
@@ -95,8 +106,12 @@ class Projection:
 
         return self.response_treat.treatment(response, pretty_response)
 
-    def delete_dataset_attributes_sync(self, dataset_name, projection_name,
-                                       fields_to_delete, pretty_response=False):
+    def delete_dataset_attributes_sync(self,
+                                       dataset_name: str,
+                                       projection_name: str,
+                                       fields_to_delete: list,
+                                       pretty_response: bool = False) \
+            -> Union[dict, str]:
         """
         description: This method delete a set of attributes on a dataset
         synchronously, the caller waits until the projection is inserted into
@@ -105,7 +120,8 @@ class Projection:
         pretty_response: If true return indented string, else return dict.
         projection_name: Represents the projection name.
         dataset_name: Represents the dataset name.
-        fields: Represents the set of attributes to be inserted.
+        fields_to_delete: Represents the set of attributes to be inserted.
+        This is list with all attributes.
 
         return: A JSON object with error or warning messages. In case of
         success, it returns the projection metadata.
@@ -125,10 +141,12 @@ class Projection:
 
         return response
 
-    def delete_dataset_attributes_async(self, dataset_name,
-                                        projection_name,
-                                        fields_to_delete,
-                                        pretty_response=False):
+    def delete_dataset_attributes_async(self,
+                                        dataset_name: str,
+                                        projection_name: str,
+                                        fields_to_delete: list,
+                                        pretty_response: bool = False) \
+            -> Union[dict, str]:
         """
         description: This method delete a set of attributes into a dataset
         asynchronously, the caller does not wait until the projections is
@@ -139,7 +157,8 @@ class Projection:
         pretty_response: If true return indented string, else return dict.
         projection_name: Represents the projection name.
         dataset_name: Represents the dataset name.
-        fields: Represents the set of attributes to be inserted.
+        fields_to_delete: Represents the set of attributes to be inserted.
+        This is list with all attributes.
 
         return: A JSON object with error or warning messages. In case of
         success, it returns the projection metadata.
@@ -159,7 +178,8 @@ class Projection:
 
         return response
 
-    def search_all_projections(self, pretty_response=False):
+    def search_all_projections(self, pretty_response: bool = False) \
+            -> Union[dict, str]:
         """
         description: This method retrieves all projection metadata, it does not
         retrieve the projection content.
@@ -175,7 +195,8 @@ class Projection:
 
         return self.response_treat.treatment(response, pretty_response)
 
-    def search_projections(self, projection_name, pretty_response=False):
+    def search_projections(self, projection_name: str,
+                           pretty_response: bool = False) -> Union[dict, str]:
         """
         description:  This method is responsible for retrieving a specific
         projection.
@@ -196,8 +217,13 @@ class Projection:
 
         return response
 
-    def search_projections_content(self, projection_name, query={}, limit=10,
-                                   skip=0, pretty_response=False):
+    def search_projections_content(self,
+                                   projection_name: str,
+                                   query: dict = {},
+                                   limit: int = 10,
+                                   skip: int = 0,
+                                   pretty_response: bool = False) \
+            -> Union[dict, str]:
         """
         description: This method is responsible for retrieving the dataset
         content.
@@ -215,15 +241,17 @@ class Projection:
         """
 
         cluster_url_projection = self.cluster_url + "/" + projection_name + \
-                                                    "?query=" + str(query) + \
-                                                    "&limit=" + str(limit) + \
-                                                    "&skip=" + str(skip)
+                                 "?query=" + str(query) + \
+                                 "&limit=" + str(limit) + \
+                                 "&skip=" + str(skip)
 
         response = requests.get(cluster_url_projection)
 
         return self.response_treat.treatment(response, pretty_response)
 
-    def delete_projections(self, projection_name, pretty_response=False):
+    def delete_projections(self, projection_name: str,
+                           pretty_response: bool = False) \
+            -> Union[dict, str]:
         """
         description: This method is responsible for deleting a projection.
         The delete operation is always synchronous because it is very fast,

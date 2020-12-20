@@ -1,12 +1,13 @@
-from response_treat import ResponseTreat
-from dataset.dataset import Dataset
+from ..response_treat import ResponseTreat
+from ..dataset.dataset import Dataset
 from PIL import Image
 import requests
 import time
+from typing import Union
 
 
 class Tsne:
-    def __init__(self, ip_from_cluster):
+    def __init__(self, ip_from_cluster: str):
         self.cluster_url = "http://" + ip_from_cluster + \
                            "/api/learningOrchestra/v1/explore/tsne"
         self.response_treat = ResponseTreat()
@@ -17,8 +18,11 @@ class Tsne:
         self.WAIT_TIME = 5
         self.CLUSTER_IP = ip_from_cluster
 
-    def run_tsne_sync(self, dataset_name, tsne_name, label,
-                      pretty_response=False):
+    def run_tsne_sync(self,
+                      dataset_name: str,
+                      tsne_name: str,
+                      label: str,
+                      pretty_response: bool = False) -> Union[dict, str]:
         """
         description: This method run t_SNE algorithm to create an image plot
         synchronously, the caller waits until the t_SNE image is inserted into
@@ -57,8 +61,11 @@ class Tsne:
             )
         return self.response_treat.treatment(response, pretty_response)
 
-    def run_tsne_async(self, dataset_name, tsne_name, label,
-                       pretty_response=False):
+    def run_tsne_async(self,
+                       dataset_name: str,
+                       tsne_name: str,
+                       label: str,
+                       pretty_response: bool = False) -> Union[dict, str]:
         """
         description: This method run t_SNE algorithm to create an image plot
         asynchronously, the caller does not wait until the t_SNE image is
@@ -98,7 +105,8 @@ class Tsne:
 
         return self.response_treat.treatment(response, pretty_response)
 
-    def search_all_tsne(self, pretty_response=False):
+    def search_all_tsne(self, pretty_response: bool = False) \
+            -> Union[dict, str]:
         """
         description: This method retrieves all t_SNE plot names, it does not
         retrieve the image plot.
@@ -115,7 +123,8 @@ class Tsne:
 
         return self.response_treat.treatment(response, pretty_response)
 
-    def search_tsne_plot(self, tsne_name, pretty_response=False):
+    def search_tsne_plot(self, tsne_name: str, pretty_response: bool = False) \
+            -> Union[dict, str]:
         """
         description: This method retrieves a t_SNE image plot.
 
@@ -141,7 +150,8 @@ class Tsne:
         else:
             return cluster_url_tsne
 
-    def delete_tsne_plot(self, tsne_name, pretty_response=False):
+    def delete_tsne_plot(self, tsne_name: str, pretty_response: bool = False) \
+            -> Union[dict, str]:
         """
         description: This method is responsible for deleting the t_SNE image
         plot. The delete operation is always synchronous because it is very
@@ -160,7 +170,8 @@ class Tsne:
 
         return self.response_treat.treatment(response, pretty_response)
 
-    def verify_tsne_exist(self, tsne_name, pretty_response=False):
+    def verify_tsne_exist(self, tsne_name: str, pretty_response: bool = False) \
+            -> Union[dict, str]:
         """
         description: This method is responsible to verify if a t_SNE image
         exist into the Learning Orchestra storage mechanism.
