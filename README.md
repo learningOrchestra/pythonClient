@@ -34,10 +34,9 @@ Shown below is an example usage of learning-orchestra-client using the [Titanic 
 
 ```python
 from learning_orchestra_client import (
-    dataset.dataset,
-    builder.builder,
-    transform.data_type,
-    transform.projection,
+    dataset,
+    builder,
+    transform,
 )
 
 cluster_ip = "34.95.187.26"

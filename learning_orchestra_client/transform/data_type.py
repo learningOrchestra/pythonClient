@@ -1,5 +1,5 @@
 from ..response_treat import ResponseTreat
-from ..dataset.dataset import Dataset
+from ..dataset import Dataset
 import requests
 from typing import Union
 
