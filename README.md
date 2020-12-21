@@ -19,13 +19,6 @@ pip install learning-orchestra-client
 
 # Usage
 
-Import learning_orchestra_client:
-
-```python
-from learning_orchestra_client import *
-```
-
-
 Each functionality in learningOrchestra is contained in its own class. Check the [python client docs](https://learningorchestra.github.io/pythonClient/) for all the available.
 
 # Example
