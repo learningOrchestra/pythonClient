@@ -1,4 +1,4 @@
-from ..response_treat import ResponseTreat
+from .._response_treat import ResponseTreat
 from ..dataset import Dataset
 import requests
 from typing import Union
