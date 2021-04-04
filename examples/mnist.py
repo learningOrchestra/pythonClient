@@ -217,39 +217,26 @@ predict_tensorflow.create_prediction_async(
         "x": "$mnist_datasets_normalized.test_images"
     }
 )
+predict_tensorflow.wait("mnist_model_predicted")
 
 evaluate_tensorflow = EvaluateTensorflow(CLUSTER_IP)
 evaluate_tensorflow.create_evaluate_async(
     name="mnist_model_evaluated",
     model_name="mnist_model",
-    parent_name="mnist_model_trained",
+    parent_name="mnist_model_predicted",
     method_name="evaluate",
     parameters={
-        "x": "$mnist_datasets_normalized.test_images",
-        "y": "$mnist_datasets_normalized.test_labels"
+        "x": "$mnist_model_predicted",
+        "y": "$$mnist_datasets_normalized.test_labels"
     }
 )
-
-predict_tensorflow.wait("mnist_model_predicted")
 evaluate_tensorflow.wait("mnist_model_evaluated")
-
-show_mnist_predict = '''
-print(mnist_predicted)
-response = None
-'''
-function_python.run_function_async(
-    name="mnist_model_predicted_print",
-    parameters={
-        "mnist_predicted": "$mnist_model_predicted"
-    },
-    code=show_mnist_predict
-)
-
 
 show_mnist_evaluate = '''
     print(mnist_evaluated)
     response = None
 '''
+
 function_python.run_function_async(
     name="mnist_model_evaluated_print",
     parameters={
@@ -257,15 +244,7 @@ function_python.run_function_async(
     },
     code=show_mnist_evaluate
 )
-
 function_python.wait("mnist_model_evaluated_print")
-function_python.wait("mnist_model_predicted_print")
-
-print(function_python.search_execution_content(
-    name="mnist_model_predicted_print",
-    limit=1,
-    skip=1,
-    pretty_response=True))
 
 print(function_python.search_execution_content(
     name="mnist_model_evaluated_print",
