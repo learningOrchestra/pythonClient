@@ -74,7 +74,6 @@ class FunctionPython:
         request_url = self.__service_url
 
         response = requests.post(url=request_url, json=request_body)
-        response.raise_for_status()
         return self.__response_treat.treatment(response, pretty_response)
 
     def search_all_executions(self, pretty_response: bool = False) \
@@ -111,7 +110,6 @@ class FunctionPython:
         request_url = f'{self.__service_url}/{name}'
 
         response = requests.delete(request_url)
-        response.raise_for_status()
         return self.__response_treat.treatment(response, pretty_response)
 
     def search_execution_content(self,

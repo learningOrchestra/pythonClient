@@ -39,7 +39,6 @@ class TransformDataType:
         }
 
         response = requests.patch(url=url_request, json=body_request)
-        response.raise_for_status()
         self.__observer.wait(dataset_name)
 
         return self.__response_treat.treatment(response, pretty_response)
@@ -66,7 +65,6 @@ class TransformDataType:
         }
 
         response = requests.patch(url=url_request, json=body_request)
-        response.raise_for_status()
         return self.__response_treat.treatment(response, pretty_response)
 
     def wait(self, dataset_name: str) -> dict:

@@ -1,6 +1,5 @@
 from ._response_treat import ResponseTreat
 import requests
-from typing import Union
 from requests import Response
 
 
@@ -13,7 +12,6 @@ class EntityReader:
         request_url = self.__entity_url
 
         response = requests.get(request_url)
-        response.raise_for_status()
         return response
 
     def read_entity_content(self,
@@ -26,5 +24,4 @@ class EntityReader:
                       f'?query={query}&limit={limit}&skip={skip}'
 
         response = requests.get(request_url)
-        response.raise_for_status()
         return response

@@ -37,7 +37,6 @@ class Dataset:
         request_url = self.__service_url
 
         response = requests.post(url=request_url, json=request_body)
-        response.raise_for_status()
         self.__observer.wait(dataset_name)
 
         return self.__response_treat.treatment(response, pretty_response)
@@ -67,7 +66,6 @@ class Dataset:
         request_url = self.__service_url
 
         response = requests.post(url=request_url, json=request_body)
-        response.raise_for_status()
         return self.__response_treat.treatment(response, pretty_response)
 
     def search_all_datasets(self, pretty_response: bool = False) \
@@ -102,9 +100,7 @@ class Dataset:
         """
 
         request_url = f'{self.__service_url}/{dataset_name}'
-
         response = requests.delete(request_url)
-        response.raise_for_status()
 
         return self.__response_treat.treatment(response, pretty_response)
 

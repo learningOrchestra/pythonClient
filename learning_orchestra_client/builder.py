@@ -50,7 +50,6 @@ class BuilderSparkMl:
         }
         response = requests.post(url=self.__service_url,
                                  json=request_body_content)
-        response.raise_for_status()
 
         for classifier in model_classifiers:
             self.__observer.wait(f'{test_dataset_name}{classifier}')
@@ -175,7 +174,6 @@ class BuilderSparkMl:
         cluster_url_dataset = f'{self.__service_url}/{builder_name}'
 
         response = requests.delete(cluster_url_dataset)
-        response.raise_for_status()
 
         return self.__response_treat.treatment(response, pretty_response)
 
