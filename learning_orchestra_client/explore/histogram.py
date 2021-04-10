@@ -1,20 +1,22 @@
 from ..observer import Observer
 from .._response_treat import ResponseTreat
-from ..dataset import Dataset
 import requests
 from typing import Union
+from .._entity_reader import EntityReader
 
 
-class Histogram:
-    def __init__(self, ip_from_cluster: str):
-        self.CLUSTER_IP = ip_from_cluster
-        self.cluster_url = "http://" + ip_from_cluster + \
-                           "/api/learningOrchestra/v1/explore/histogram"
-        self.response_treat = ResponseTreat()
-        self.INPUT_NAME = "inputDatasetName"
-        self.OUTPUT_NAME = "outputDatasetName"
-        self.FIELDS = "names"
-        self.dataset = Dataset(ip_from_cluster)
+class ExploreHistogram:
+    __INPUT_NAME = "inputDatasetName"
+    __OUTPUT_NAME = "outputDatasetName"
+    __FIELDS = "names"
+
+    def __init__(self, cluster_ip: str):
+        self.__cluster_ip = cluster_ip
+        self.__api_path = "/api/learningOrchestra/v1/explore/histogram"
+        self.__service_url = f'{cluster_ip}{self.__api_path}'
+        self.__response_treat = ResponseTreat()
+        self.__observer = Observer(self.__cluster_ip)
+        self.__entity_reader = EntityReader(self.__service_url)
 
     def run_histogram_sync(self,
                            dataset_name: str,
@@ -37,28 +39,16 @@ class Histogram:
         """
 
         request_body = {
-            self.INPUT_NAME: dataset_name,
-            self.OUTPUT_NAME: histogram_name,
-            self.FIELDS: fields,
+            self.__INPUT_NAME: dataset_name,
+            self.__OUTPUT_NAME: histogram_name,
+            self.__FIELDS: fields,
         }
-        request_url = self.cluster_url
+        request_url = self.__service_url
 
         response = requests.post(url=request_url, json=request_body)
+        self.__observer.wait(dataset_name)
 
-        Observer(histogram_name, self.CLUSTER_IP).observe_processing(
-            pretty_response)
-
-        if pretty_response:
-            print(
-                "\n----------"
-                + " CREATE HISTOGRAM FROM "
-                + dataset_name
-                + " TO "
-                + histogram_name
-                + " ----------"
-            )
-
-        return self.response_treat.treatment(response, pretty_response)
+        return self.__response_treat.treatment(response, pretty_response)
 
     def run_histogram_async(self,
                             dataset_name: str,
@@ -83,25 +73,15 @@ class Histogram:
         """
 
         request_body = {
-            self.INPUT_NAME: dataset_name,
-            self.OUTPUT_NAME: histogram_name,
-            self.FIELDS: fields,
+            self.__INPUT_NAME: dataset_name,
+            self.__OUTPUT_NAME: histogram_name,
+            self.__FIELDS: fields,
         }
-        request_url = self.cluster_url
+        request_url = self.__service_url
 
         response = requests.post(url=request_url, json=request_body)
 
-        if pretty_response:
-            print(
-                "\n----------"
-                + " CREATE HISTOGRAM FROM "
-                + dataset_name
-                + " TO "
-                + histogram_name
-                + " ----------"
-            )
-
-        return self.response_treat.treatment(response, pretty_response)
+        return self.__response_treat.treatment(response, pretty_response)
 
     def search_all_histograms(self, pretty_response: bool = False) \
             -> Union[dict, str]:
@@ -115,18 +95,15 @@ class Histogram:
         or an empty result.
         """
 
-        cluster_url_histogram = self.cluster_url
+        response = self.__entity_reader.read_all_instances_from_entity()
+        return self.__response_treat.treatment(response, pretty_response)
 
-        response = requests.get(cluster_url_histogram)
-
-        return self.response_treat.treatment(response, pretty_response)
-
-    def search_histogram_data(self,
-                              histogram_name: str,
-                              query: dict = {},
-                              limit: int = 10,
-                              skip: int = 0,
-                              pretty_response: bool = False) \
+    def search_histogram_content(self,
+                                 histogram_name: str,
+                                 query: dict = {},
+                                 limit: int = 10,
+                                 skip: int = 0,
+                                 pretty_response: bool = False) \
             -> Union[dict, str]:
         """
         description: This method is responsible for retrieving the histogram
@@ -144,14 +121,10 @@ class Histogram:
         future content requests.
         """
 
-        cluster_url_histogram = self.cluster_url + "/" + histogram_name + \
-                                "?query=" + str(query) + \
-                                "&limit=" + str(limit) + \
-                                "&skip=" + str(skip)
+        response = self.__entity_reader.read_entity_content(
+            histogram_name, query, limit, skip)
 
-        response = requests.get(cluster_url_histogram)
-
-        return self.response_treat.treatment(response, pretty_response)
+        return self.__response_treat.treatment(response, pretty_response)
 
     def delete_histogram(self, histogram_name: str,
                          pretty_response: bool = False) -> Union[dict, str]:
@@ -167,8 +140,7 @@ class Histogram:
         correct delete message
         """
 
-        cluster_url_histogram = self.cluster_url + "/" + histogram_name
-
+        cluster_url_histogram = f'{self.__service_url}/{histogram_name}'
         response = requests.delete(cluster_url_histogram)
 
-        return self.response_treat.treatment(response, pretty_response)
+        return self.__response_treat.treatment(response, pretty_response)
