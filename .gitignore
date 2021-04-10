@@ -6,7 +6,6 @@ learning_orchestra_client/transform/__pycache__
 learning_orchestra_client/main.py
 learning_orchestra_client/explore/__pycache__
 learning_orchestra_client/builder/__pycache__
-docs
 sentiment_analysis_output.py
 mnist_output.py
 mnist_treatment.py
