@@ -1,16 +1,15 @@
-__author__ = "Otavio Henrique Rodrigues Mapa & Matheus Goncalves Ribeiro"
-__credits__ = "all free source developers"
-__status__ = "Prototype"
-
 import json
-
+from requests import Response
+import logging
+from typing import Union
 
 class ResponseTreat:
     HTTP_CREATED = 201
     HTTP_SUCCESS = 200
     HTTP_ERROR = 500
 
-    def treatment(self, response, pretty_response: bool = True):
+    def treatment(self, response: Response,
+                  pretty_response: bool = True) -> Union[dict, str]:
         """
         description: This method is responsible to return an indented json file
         or a dict.
@@ -20,12 +19,13 @@ class ResponseTreat:
         return: Indented json file or a dict.
         """
         if response.status_code >= self.HTTP_ERROR:
-            return response.text
+            logging.error(response.text)
         elif (
                 response.status_code != self.HTTP_SUCCESS
                 and response.status_code != self.HTTP_CREATED
         ):
-            raise Exception(response.json()["result"])
+            logging.warning(response.json()["result"])
+            return {}
         else:
             if pretty_response:
                 return json.dumps(response.json(), indent=4, sort_keys=True)

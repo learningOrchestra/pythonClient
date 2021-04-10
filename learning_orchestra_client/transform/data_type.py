@@ -1,22 +1,25 @@
 from .._response_treat import ResponseTreat
-from ..dataset import Dataset
+from .._entity_reader import EntityReader
+from ..observer import Observer
 import requests
 from typing import Union
 
 
-class DataType:
-    def __init__(self, ip_from_cluster):
-        self.CLUSTER_IP = ip_from_cluster
-        self.cluster_url = "http://" + ip_from_cluster + \
-                           "/api/learningOrchestra/v1/transform/dataType"
-        self.ResponseTreat = ResponseTreat()
-        self.Dataset = Dataset(ip_from_cluster)
-        self.INPUT_NAME = "inputDatasetName"
-        self.TYPES = "types"
+class TransformDataType:
+    __INPUT_NAME = "inputDatasetName"
+    __TYPES = "types"
 
-    def update_dataset_types(self,
+    def __init__(self, cluster_ip: str):
+        self.__api_path = "/api/learningOrchestra/v1/transform/dataType"
+        self.__service_url = f'{cluster_ip}{self.__api_path}'
+        self.__response_treat = ResponseTreat()
+        self.__cluster_ip = cluster_ip
+        self.__entity_reader = EntityReader(self.__service_url)
+        self.__observer = Observer(self.__cluster_ip)
+
+    def update_dataset_type_sync(self,
                              dataset_name: str,
-                             fields_change: dict,
+                             types: dict,
                              pretty_response: bool = False) \
             -> Union[dict, str]:
         """
@@ -29,12 +32,42 @@ class DataType:
         return: A JSON object with error or warning messages.
         """
 
-        url_request = self.cluster_url
+        url_request = self.__service_url
         body_request = {
-            self.INPUT_NAME: dataset_name,
-            self.TYPES: fields_change
+            self.__INPUT_NAME: dataset_name,
+            self.__TYPES: types
         }
 
         response = requests.patch(url=url_request, json=body_request)
+        response.raise_for_status()
+        self.__observer.wait(dataset_name)
 
-        return self.ResponseTreat.treatment(response, pretty_response)
+        return self.__response_treat.treatment(response, pretty_response)
+
+    def update_dataset_type_async(self,
+                             dataset_name: str,
+                             types: dict,
+                             pretty_response: bool = False) \
+            -> Union[dict, str]:
+        """
+        description: Change types of fields to number or string.
+
+        dataset_name: Represents the dataset name.
+        fields_change: Fields to change with types. This is a dict with each
+        key:value being field:type
+
+        return: A JSON object with error or warning messages.
+        """
+
+        url_request = self.__service_url
+        body_request = {
+            self.__INPUT_NAME: dataset_name,
+            self.__TYPES: types
+        }
+
+        response = requests.patch(url=url_request, json=body_request)
+        response.raise_for_status()
+        return self.__response_treat.treatment(response, pretty_response)
+
+    def wait(self, dataset_name: str) -> dict:
+        return self.__observer.wait(dataset_name)

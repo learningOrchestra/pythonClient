@@ -1,23 +1,24 @@
 from .._response_treat import ResponseTreat
-from ..dataset import Dataset
 from ..observer import Observer
+from .._entity_reader import EntityReader
 import requests
 from typing import Union
 
 
-class Projection:
-    def __init__(self, ip_from_cluster: str):
-        self.cluster_url = "http://" + ip_from_cluster + \
-                           "/api/learningOrchestra/v1/transform/projection"
-        self.METADATA_INDEX = 0
-        self.response_treat = ResponseTreat()
-        self.INPUT_NAME = "inputDatasetName"
-        self.OUTPUT_NAME = "outputDatasetName"
-        self.FIELDS = "names"
-        self.dataset = Dataset(ip_from_cluster)
-        self.CLUSTER_IP = ip_from_cluster
+class TransformProjection:
+    __INPUT_NAME = "inputDatasetName"
+    __OUTPUT_NAME = "outputDatasetName"
+    __FIELDS = "names"
 
-    def insert_dataset_attributes_sync(self,
+    def __init__(self, cluster_ip: str):
+        self.__api_path = "/api/learningOrchestra/v1/transform/projection"
+        self.__service_url = f'{cluster_ip}{self.__api_path}'
+        self.__response_treat = ResponseTreat()
+        self.__cluster_ip = cluster_ip
+        self.__entity_reader = EntityReader(self.__service_url)
+        self.__observer = Observer(self.__cluster_ip)
+
+    def remove_dataset_attributes_sync(self,
                                        dataset_name: str,
                                        projection_name: str,
                                        fields: list,
@@ -39,30 +40,18 @@ class Projection:
         """
 
         request_body = {
-            self.INPUT_NAME: dataset_name,
-            self.OUTPUT_NAME: projection_name,
-            self.FIELDS: fields,
+            self.__INPUT_NAME: dataset_name,
+            self.__OUTPUT_NAME: projection_name,
+            self.__FIELDS: fields,
         }
-        request_url = self.cluster_url
-
+        request_url = self.__service_url
         response = requests.post(url=request_url, json=request_body)
+        response.raise_for_status()
+        self.__observer.wait(dataset_name)
 
-        Observer(projection_name, self.CLUSTER_IP).observe_processing(
-            pretty_response)
+        return self.__response_treat.treatment(response, pretty_response)
 
-        if pretty_response:
-            print(
-                "\n----------"
-                + " CREATE PROJECTION FROM "
-                + dataset_name
-                + " TO "
-                + projection_name
-                + " ----------"
-            )
-
-        return self.response_treat.treatment(response, pretty_response)
-
-    def insert_dataset_attributes_async(self,
+    def remove_dataset_attributes_async(self,
                                         dataset_name: str,
                                         projection_name: str,
                                         fields: list,
@@ -86,97 +75,15 @@ class Projection:
         """
 
         request_body = {
-            self.INPUT_NAME: dataset_name,
-            self.OUTPUT_NAME: projection_name,
-            self.FIELDS: fields,
+            self.__INPUT_NAME: dataset_name,
+            self.__OUTPUT_NAME: projection_name,
+            self.__FIELDS: fields,
         }
-        request_url = self.cluster_url
-
+        request_url = self.__service_url
         response = requests.post(url=request_url, json=request_body)
+        response.raise_for_status()
 
-        if pretty_response:
-            print(
-                "\n----------"
-                + " CREATE PROJECTION FROM "
-                + dataset_name
-                + " TO "
-                + projection_name
-                + " ----------"
-            )
-
-        return self.response_treat.treatment(response, pretty_response)
-
-    def delete_dataset_attributes_sync(self,
-                                       dataset_name: str,
-                                       projection_name: str,
-                                       fields_to_delete: list,
-                                       pretty_response: bool = False) \
-            -> Union[dict, str]:
-        """
-        description: This method delete a set of attributes on a dataset
-        synchronously, the caller waits until the projection is inserted into
-        the Learning Orchestra storage mechanism.
-
-        pretty_response: If true return indented string, else return dict.
-        projection_name: Represents the projection name.
-        dataset_name: Represents the dataset name.
-        fields_to_delete: Represents the set of attributes to be inserted.
-        This is list with all attributes.
-
-        return: A JSON object with error or warning messages. In case of
-        success, it returns the projection metadata.
-        """
-        dataset_metadata = self.search_projections_content(dataset_name,
-                                                           limit=1)
-
-        fields_to_insert = dataset_metadata.get('result')[self.METADATA_INDEX] \
-            .get('fields')
-        for field in fields_to_delete:
-            fields_to_insert.remove(field)
-
-        response = self.insert_dataset_attributes_sync(dataset_name,
-                                                       projection_name,
-                                                       fields_to_insert,
-                                                       pretty_response)
-
-        return response
-
-    def delete_dataset_attributes_async(self,
-                                        dataset_name: str,
-                                        projection_name: str,
-                                        fields_to_delete: list,
-                                        pretty_response: bool = False) \
-            -> Union[dict, str]:
-        """
-        description: This method delete a set of attributes into a dataset
-        asynchronously, the caller does not wait until the projections is
-        inserted into the Learning Orchestra storage mechanism. Instead,
-        the caller receives a JSON object with a URL to proceed future calls
-        to verify if the projection was inserted.
-
-        pretty_response: If true return indented string, else return dict.
-        projection_name: Represents the projection name.
-        dataset_name: Represents the dataset name.
-        fields_to_delete: Represents the set of attributes to be inserted.
-        This is list with all attributes.
-
-        return: A JSON object with error or warning messages. In case of
-        success, it returns the projection metadata.
-        """
-        dataset_metadata = self.search_projections_content(dataset_name,
-                                                           limit=1)
-
-        fields_to_insert = dataset_metadata.get('result')[self.METADATA_INDEX] \
-            .get('fields')
-        for field in fields_to_delete:
-            fields_to_insert.remove(field)
-
-        response = self.insert_dataset_attributes_async(dataset_name,
-                                                        projection_name,
-                                                        fields_to_insert,
-                                                        pretty_response)
-
-        return response
+        return self.__response_treat.treatment(response, pretty_response)
 
     def search_all_projections(self, pretty_response: bool = False) \
             -> Union[dict, str]:
@@ -189,35 +96,10 @@ class Projection:
         return: A list with all projections metadata stored in Learning
         Orchestra or an empty result.
         """
-        cluster_url_projection = self.cluster_url
+        response = self.__entity_reader.read_all_instances_from_entity()
+        return self.__response_treat.treatment(response, pretty_response)
 
-        response = requests.get(cluster_url_projection)
-
-        return self.response_treat.treatment(response, pretty_response)
-
-    def search_projections(self, projection_name: str,
-                           pretty_response: bool = False) -> Union[dict, str]:
-        """
-        description:  This method is responsible for retrieving a specific
-        projection.
-
-        pretty_response: If true return indented string, else return dict.
-        projection_name: Represents the projection name.
-        limit: Number of rows to return in pagination(default: 10) (maximum is
-        set at 20 rows per request)
-        skip: Number of rows to skip in pagination(default: 0)
-
-        return: Specific projection metadata stored in Learning Orchestra or an
-        error if there is no such projections.
-        """
-        pretty = pretty_response
-
-        response = self.search_projections_content(projection_name, limit=1,
-                                                   pretty_response=pretty)
-
-        return response
-
-    def search_projections_content(self,
+    def search_projection_content(self,
                                    projection_name: str,
                                    query: dict = {},
                                    limit: int = 10,
@@ -240,16 +122,12 @@ class Projection:
         future content requests.
         """
 
-        cluster_url_projection = self.cluster_url + "/" + projection_name + \
-                                 "?query=" + str(query) + \
-                                 "&limit=" + str(limit) + \
-                                 "&skip=" + str(skip)
+        response = self.__entity_reader.read_entity_content(
+            projection_name, query, limit, skip)
 
-        response = requests.get(cluster_url_projection)
+        return self.__response_treat.treatment(response, pretty_response)
 
-        return self.response_treat.treatment(response, pretty_response)
-
-    def delete_projections(self, projection_name: str,
+    def delete_projection_async(self, projection_name: str,
                            pretty_response: bool = False) \
             -> Union[dict, str]:
         """
@@ -265,8 +143,12 @@ class Projection:
         return: JSON object with an error message, a warning message or a
         correct delete message
         """
-        cluster_url_projection = self.cluster_url + "/" + projection_name
+        cluster_url_projection = f'{self.__service_url}/{projection_name}'
 
         response = requests.delete(cluster_url_projection)
+        response.raise_for_status()
 
-        return self.response_treat.treatment(response, pretty_response)
+        return self.__response_treat.treatment(response, pretty_response)
+
+    def wait(self, projection_name: str) -> dict:
+        return self.__observer.wait(projection_name)
