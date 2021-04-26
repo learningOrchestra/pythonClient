@@ -3,16 +3,16 @@ from learning_orchestra_client.transform.projection import TransformProjection
 from learning_orchestra_client.transform.data_type import TransformDataType
 from learning_orchestra_client.builder import BuilderSparkMl
 
-CLUSTER_IP = "http://34.66.75.31"
+CLUSTER_IP = "http://35.193.116.104"
 
 dataset_csv = DatasetCsv(CLUSTER_IP)
 
 dataset_csv.insert_dataset_async(
-    url="https://filebin.net/r4b6z6sganz2opsh/train.csv?t=9d3lp7jm",
+    url="https://filebin.net/boniydu54k710l54/train.csv?t=s350xryf",
     dataset_name="titanic_training",
 )
 dataset_csv.insert_dataset_async(
-    url="https://filebin.net/r0c41p538us5fcrz/test.csv?t=td68r02h",
+    url="https://filebin.net/udtf7eogfgasqnx5/test.csv?t=h79pcy0l",
     dataset_name="titanic_testing"
 )
 
@@ -41,7 +41,7 @@ required_columns = [
 
 transform_projection.remove_dataset_attributes_async(
     dataset_name="titanic_training",
-    projection_name="titanic_training_projection4",
+    projection_name="titanic_training_projection",
     fields=required_columns)
 
 required_columns.remove("Survived")
@@ -174,8 +174,11 @@ for index, dataset in enumerate(datasets_list):
 training_df = datasets_list[TRAINING_DF_INDEX]
 testing_df = datasets_list[TESTING_DF_INDEX]
 
+columns_without_label = training_df.columns.copy()
+columns_without_label.remove("label")
+
 assembler = VectorAssembler(
-    inputCols=training_df.columns[:],
+    inputCols=columns_without_label,
     outputCol="features")
 assembler.setHandleInvalid('skip')
 
@@ -192,7 +195,12 @@ result = builder.run_spark_ml_async(
     modeling_code=modeling_code,
     model_classifiers=["LR", "DT", "GB", "RF", "NB"])
 
-for prediction in result["result"]:
-    builder.wait(dataset_name=prediction)
+PREDICTION_NAME_INDEX_IN_URL = 6
+INDEX_TO_REMOVE_URI_PARAMETERS = 0
+for prediction_url in result["result"]:
+    prediction_name = prediction_url. \
+        split("/")[PREDICTION_NAME_INDEX_IN_URL]. \
+        split("?")[INDEX_TO_REMOVE_URI_PARAMETERS]
+    builder.wait(dataset_name=prediction_name)
     print(builder.search_builder_register_predictions(
-        builder_name=prediction, limit=1, pretty_response=True))
+        builder_name=prediction_name, limit=1, pretty_response=True))
