@@ -25,6 +25,6 @@ Each functionality in learningOrchestra is contained in its own class. Check the
 
 * [Here](examples/titanic.py) has an example using the [Titanic Dataset](https://www.kaggle.com/c/titanic/overview):
 * [Here](examples/sentiment_analysis.py) has an example using the [Sentiment Analysis On IMDb reviews](https://www.kaggle.com/avnika22/imdb-perform-sentiment-analysis-with-scikit-learn):
-* [Here](examples/mnist.py) has an example using the [MNIST Dataset](http://yann.lecun.com/exdb/mnist/):
+* [Here](examples/mnist_async.py) has an example using the [MNIST Dataset](http://yann.lecun.com/exdb/mnist/):
 
 
