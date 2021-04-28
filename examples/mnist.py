@@ -247,8 +247,8 @@ function_python.run_function_async(
 
 
 show_mnist_evaluate = '''
-    print(mnist_evaluated)
-    response = None
+print(mnist_evaluated)
+response = None
 '''
 function_python.run_function_async(
     name="mnist_model_evaluated_print",
