@@ -4,7 +4,7 @@ from learning_orchestra_client.model.scikitlearn import ModelScikitLearn
 from learning_orchestra_client.train.scikitlearn import TrainScikitLearn
 from learning_orchestra_client.predict.scikitlearn import PredictScikitLearn
 
-CLUSTER_IP = "http://34.68.100.96"
+CLUSTER_IP = "http://34.123.167.241"
 
 dataset_csv = DatasetCsv(CLUSTER_IP)
 
@@ -107,12 +107,12 @@ model_scikitlearn.create_model_sync(
     module_path="sklearn.linear_model",
     class_name="LogisticRegressionCV",
     class_parameters={
-        "cv": 6,
+        "cv": 5,
         "scoring": "accuracy",
         "random_state": 0,
         "n_jobs": -1,
         "verbose": 3,
-        "max_iter": 500
+        "max_iter": 100
     }
 
 )
