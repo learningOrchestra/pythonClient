@@ -5,7 +5,7 @@ import requests
 from typing import Union
 
 
-class Train:
+class Explore:
     __PARENT_NAME_FIELD = "parentName"
     __MODEL_NAME_FIELD = "modelName"
     __METHOD_NAME_FIELD = "method"
@@ -20,9 +20,9 @@ class Train:
         self.__entity_reader = EntityReader(self.__service_url)
         self.__observer = Observer(self.__cluster_ip)
 
-    def create_training_sync(self,
+    def create_explore_sync(self,
                              name: str,
-                             model_name:str,
+                             model_name: str,
                              parent_name: str,
                              method_name: str,
                              parameters: dict,
@@ -30,13 +30,13 @@ class Train:
                              pretty_response: bool = False) -> \
             Union[dict, str]:
         """
-        description: This method is responsible to train models in sync mode
+        description: This method runs an evaluation about a model in sync mode
 
         pretty_response: If true it returns a string, otherwise a dictionary.
-        name: Is the name of the train output object that will be created.
-        parent_name: Is the name of the previous ML step of the pipeline
-        method_name: is the name of the method to be executed (the ML tool way to train models)
-        parameters: Is the set of parameters used by the method
+        name: Is the name of the model that will be explored.
+        parent_name: The name of the previous pipe in the pipeline
+        method_name: the name of the ML tool method used to explore a model
+        parameters: the set of parameters of the ML method defined previously
 
         return: A JSON object with an error or warning message or a URL
         indicating the correct operation.
@@ -56,7 +56,7 @@ class Train:
 
         return self.__response_treat.treatment(response, pretty_response)
 
-    def create_training_async(self,
+    def create_explore_async(self,
                               name: str,
                               model_name: str,
                               parent_name: str,
@@ -66,14 +66,13 @@ class Train:
                               pretty_response: bool = False) -> \
             Union[dict, str]:
         """
-        description: This method is responsible to train models in async mode.
-        A wait method call is mandatory due to the asynchronous aspect.
+        description: This method runs an explore service about a model in async mode
 
         pretty_response: If true it returns a string, otherwise a dictionary.
-        name: Is the name of the train output object that will be created.
-        parent_name: Is the name of the previous ML step of the pipeline
-        method_name: is the name of the method to be executed (the ML tool way to train models)
-        parameters: Is the set of parameters used by the method
+        name: Is the name of the model that will be explored.
+        parent_name: The name of the previous pipe in the pipeline
+        method_name: the name of the ML tool method used to explore a model
+        parameters: the set of parameters of the ML method defined previously
 
         return: A JSON object with an error or warning message or a URL
         indicating the correct operation.
@@ -91,76 +90,72 @@ class Train:
         response = requests.post(url=request_url, json=request_body)
         return self.__response_treat.treatment(response, pretty_response)
 
-    def search_all_trainings(self, pretty_response: bool = False) \
+    def search_all_explores(self, pretty_response: bool = False) \
             -> Union[dict, str]:
         """
-        description: This method retrieves all train metadata, i.e., it does
-        not retrieve the train content.
+        description: This method retrieves all created explorations, i.e., it does
+        not retrieve the specific explore content.
 
         pretty_response: If true it returns a string, otherwise a dictionary.
 
-        return: All predict metadata stored in Learning Orchestra or an empty
+        return: All datasets metadata stored in Learning Orchestra or an empty
         result.
         """
         response = self.__entity_reader.read_all_instances_from_entity()
         return self.__response_treat.treatment(response, pretty_response)
 
-    def delete_training(self, name: str, pretty_response=False) \
+    def delete_explore(self, name: str, pretty_response=False) \
             -> Union[dict, str]:
         """
-        description: This method is responsible for deleting the train step.
+        description: This method is responsible for deleting an explore result.
         This delete operation is asynchronous, so it does not lock the caller
          until the deletion finished. Instead, it returns a JSON object with a
-         URL for a future use. The caller uses the URL for delete checks.
+         URL for a future use. The caller uses the wait method for delete checks. If a
+         dataset was used by another task (Ex. projection, histogram, pca, tune
+         and so forth), it cannot be deleted.
 
         pretty_response: If true it returns a string, otherwise a dictionary.
-        name: Represents the train name.
+        name: Represents the model name.
 
         return: JSON object with an error message, a warning message or a
         correct delete message
         """
+
         request_url = f'{self.__service_url}/{name}'
 
         response = requests.delete(request_url)
         return self.__response_treat.treatment(response, pretty_response)
 
-    def search_training_content(self,
+    def search_explore_image(self,
                                 name: str,
-                                query: dict = {},
-                                limit: int = 10,
-                                skip: int = 0,
                                 pretty_response: bool = False) \
             -> Union[dict, str]:
         """
-        description:  This method is responsible for retrieving all the train
-        tuples or registers, as well as the metadata content
+        description:  This method is responsible for retrieving the explore
+        image to be plotted
 
         pretty_response: If true it returns a string, otherwise a dictionary.
-        name: Is the name of the train object
-        query: Query to make in MongoDB(default: empty query)
-        limit: Number of rows to return in pagination(default: 10) (maximum is
-        set at 20 rows per request)
-        skip: Number of rows to skip in pagination(default: 0)
+        name: Is the name of the model.
 
-        return A page with some trains inside or an error if there
-        is no such train object. The current page is also returned to be used in
-        future content requests.
+        return An URL with a link for an image or an error if there
+        is no such result.
         """
+
         response = self.__entity_reader.read_entity_content(
-            name, query, limit, skip)
+            name)
 
         return self.__response_treat.treatment(response, pretty_response)
 
     def wait(self, name: str, timeout: str) -> dict:
         """
            description: This method is responsible to create a synchronization
-           barrier for the create_train_async method, delete_train method.
+           barrier for the create_explore_async method, delete_explore_async method.
 
-           name: Represents the train name.
-           timeout: Represents the time in seconds to wait for a train to finish its run. The -1 value
-           waits until the train finishes.
+           name: Represents the model name.
+           timeout: Represents the time in seconds to wait for an explore to finish its run. The -1 value
+           waits until the explore finishes.
 
            return: JSON object with an error message, a warning message or a
-           correct train result
+           correct explore result (the image URL as an explore result)
         """
         return self.__observer.wait(name, timeout)

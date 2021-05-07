@@ -1,6 +1,6 @@
-from ..observer import Observer
-from .._response_treat import ResponseTreat
-from .._entity_reader import EntityReader
+from ..observe import Observer
+from learning_orchestra_client.util._response_treat import ResponseTreat
+from learning_orchestra_client.util._entity_reader import EntityReader
 import requests
 from typing import Union
 
@@ -32,9 +32,11 @@ class Evaluate:
         """
         description: This method runs an evaluation about a model in sync mode
 
-        pretty_response: If true return indented string, else return dict.
-        dataset_name: Is the name of the dataset file that will be created.
-        url: Url to CSV file.
+        pretty_response: If true it returns a string, otherwise a dictionary.
+        name: Is the name of the model that will be evaluated.
+        parent_name: The name of the previous pipe in the pipeline
+        method_name: the name of the ML tool method used to evaluate a model
+        parameters: the set of parameters of the ML method defined previously
 
         return: A JSON object with an error or warning message or a URL
         indicating the correct operation.
@@ -64,11 +66,13 @@ class Evaluate:
                               pretty_response: bool = False) -> \
             Union[dict, str]:
         """
-        description: his method runs an evaluation about a model in async mode
+        description: This method runs an evaluation about a model in async mode
 
-        pretty_response: If true return indented string, else return dict.
-        dataset_name: Is the name of the dataset file that will be created.
-        url: Url to CSV file.
+        pretty_response: If true it returns a string, otherwise a dictionary.
+        name: Is the name of the model that will be evaluated.
+        parent_name: The name of the previous pipe in the pipeline
+        method_name: the name of the ML tool method used to evaluate a model
+        parameters: the set of parameters of the ML method defined previously
 
         return: A JSON object with an error or warning message or a URL
         indicating the correct operation.
@@ -92,7 +96,7 @@ class Evaluate:
         description: This method retrieves all created evaluations, i.e., it does
         not retrieve the specific evaluation content.
 
-        pretty_response: If true return indented string, else return dict.
+        pretty_response: If true it returns a string, otherwise a dictionary.
 
         return: All datasets metadata stored in Learning Orchestra or an empty
         result.
@@ -100,18 +104,18 @@ class Evaluate:
         response = self.__entity_reader.read_all_instances_from_entity()
         return self.__response_treat.treatment(response, pretty_response)
 
-    def delete_evaluate_async(self, name: str, pretty_response=False) \
+    def delete_evaluate(self, name: str, pretty_response=False) \
             -> Union[dict, str]:
         """
-        description: This method is responsible for deleting an evaluation.
+        description: This method is responsible for deleting an evaluation result.
         This delete operation is asynchronous, so it does not lock the caller
          until the deletion finished. Instead, it returns a JSON object with a
-         URL for a future use. The caller uses the URL for delete checks. If a
+         URL for a future use. The caller uses the wait method for delete checks. If a
          dataset was used by another task (Ex. projection, histogram, pca, tune
          and so forth), it cannot be deleted.
 
-        pretty_response: If true return indented string, else return dict.
-        dataset_name: Represents the dataset name.
+        pretty_response: If true it returns a string, otherwise a dictionary.
+        name: Represents the model name.
 
         return: JSON object with an error message, a warning message or a
         correct delete message
@@ -133,14 +137,14 @@ class Evaluate:
         description:  This method is responsible for retrieving the evaluation
         content
 
-        pretty_response: If true return indented string, else return dict.
-        dataset_name: Is the name of the dataset file.
+        pretty_response: If true it returns a string, otherwise a dictionary.
+        name: Is the name of the model.
         query: Query to make in MongoDB(default: empty query)
         limit: Number of rows to return in pagination(default: 10) (maximum is
         set at 20 rows per request)
         skip: Number of rows to skip in pagination(default: 0)
 
-        return A page with some tuples or registers inside or an error if there
+        return A page with some metadata inside or an error if there
         is no such dataset. The current page is also returned to be used in
         future content requests.
         """
@@ -150,5 +154,16 @@ class Evaluate:
 
         return self.__response_treat.treatment(response, pretty_response)
 
-    def wait(self, name: str) -> dict:
-        return self.__observer.wait(name)
+    def wait(self, name: str, timeout: str) -> dict:
+        """
+           description: This method is responsible to create a synchronization
+           barrier for the create_evaluate_async method and delete_evaluate_async method.
+
+           name: Represents the model name.
+           timeout: Represents the time in seconds to wait for an evaluation to finish its run. The -1 value
+           waits until the evaluation finishes.
+
+           return: JSON object with an error message, a warning message or a
+           correct evaluation result
+        """
+        return self.__observer.wait(name, timeout)
