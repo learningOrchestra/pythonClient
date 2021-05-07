@@ -1,6 +1,6 @@
-from ..observer import Observer
-from .._response_treat import ResponseTreat
-from .._entity_reader import EntityReader
+from ..observe import Observer
+from learning_orchestra_client.util._response_treat import ResponseTreat
+from learning_orchestra_client.util._entity_reader import EntityReader
 import requests
 from typing import Union
 
@@ -27,11 +27,13 @@ class Model:
                           description: str = "",
                           pretty_response: bool = False) -> Union[dict, str]:
         """
-        description: This method is responsible to create a model in sync mode.
+        description: This method runs a model creation in sync mode
 
-        pretty_response: If true return indented string, else return dict.
-        dataset_name: Is the name of the dataset file that will be created.
-        url: Url to CSV file.
+        pretty_response: If true it returns a string, otherwise a dictionary.
+        name: Is the name of the model that will be created.
+        class_name: is the name of the class to be executed
+        module_path: The name of the package of the ML tool used (Ex. Scikit-learn or TensorFlow)
+        class_parameters: the set of parameters of the ML class defined previously
 
         return: A JSON object with an error or warning message or a URL
         indicating the correct operation.
@@ -58,14 +60,17 @@ class Model:
                            description: str = "",
                            pretty_response: bool = False) -> Union[dict, str]:
         """
-        description: This method is responsible to create a model in async mode.
+        description: This method runs a model creation in async mode, thus it requires a
+        wait method call
 
-        pretty_response: If true return indented string, else return dict.
-        dataset_name: Is the name of the dataset file that will be created.
-        url: Url to CSV file.
+        pretty_response: If true it returns a string, otherwise a dictionary.
+        name: Is the name of the model that will be created.
+        class_name: is the name of the class to be executed
+        module_path: The name of the package of the ML tool used (Ex. Scikit-learn or TensorFlow)
+        class_parameters: the set of parameters of the ML class defined previously
 
         return: A JSON object with an error or warning message or a URL
-        indicating the correct operation.
+        indicating the future correct operation.
         """
         request_body = {
             self.__NAME_FIELD: name,
@@ -84,28 +89,26 @@ class Model:
             -> Union[dict, str]:
         """
         description: This method retrieves all models metadata, i.e., it does
-        not retrieve the metadata model content.
+        not retrieve the model content.
 
-        pretty_response: If true return indented string, else return dict.
+        pretty_response: If true it returns a string, otherwise a dictionary.
 
-        return: All datasets metadata stored in Learning Orchestra or an empty
+        return: All models metadata stored in Learning Orchestra or an empty
         result.
         """
         response = self.__entity_reader.read_all_instances_from_entity()
         return self.__response_treat.treatment(response, pretty_response)
 
-    def delete_model_async(self, name: str, pretty_response=False) \
+    def delete_model(self, name: str, pretty_response=False) \
             -> Union[dict, str]:
         """
         description: This method is responsible for deleting the model.
         This delete operation is asynchronous, so it does not lock the caller
          until the deletion finished. Instead, it returns a JSON object with a
-         URL for a future use. The caller uses the URL for delete checks. If a
-         dataset was used by another task (Ex. projection, histogram, pca, tune
-         and so forth), it cannot be deleted.
+         URL for a future use. The caller uses the URL for delete checks.
 
-        pretty_response: If true return indented string, else return dict.
-        dataset_name: Represents the dataset name.
+        pretty_response: If true it returns a string, otherwise a dictionary.
+        name: Represents the model name.
 
         return: JSON object with an error message, a warning message or a
         correct delete message
@@ -116,33 +119,36 @@ class Model:
         response = requests.delete(request_url)
         return self.__response_treat.treatment(response, pretty_response)
 
-    def search_model_content(self,
+    def search_model(self,
                              name: str,
-                             query: dict = {},
-                             limit: int = 10,
-                             skip: int = 0,
                              pretty_response: bool = False) \
             -> Union[dict, str]:
         """
-        description:  This method is responsible for retrieving the model metadata
-        content
+        description: This method retrieves a model metadata, i.e., it does
+        not retrieve the model content.
 
-        pretty_response: If true return indented string, else return dict.
-        dataset_name: Is the name of the dataset file.
-        query: Query to make in MongoDB(default: empty query)
-        limit: Number of rows to return in pagination(default: 10) (maximum is
-        set at 20 rows per request)
-        skip: Number of rows to skip in pagination(default: 0)
+        pretty_response: If true it returns a string, otherwise a dictionary.
+        name: Is the model name
 
-        return A page with some tuples or registers inside or an error if there
-        is no such dataset. The current page is also returned to be used in
-        future content requests.
+        return: A model metadata stored in Learning Orchestra or an empty
+        result.
         """
 
         response = self.__entity_reader.read_entity_content(
-            name, query, limit, skip)
+            name)
 
         return self.__response_treat.treatment(response, pretty_response)
 
-    def wait(self, name: str) -> dict:
-        return self.__observer.wait(name)
+    def wait(self, name: str, timeout: str) -> dict:
+        """
+           description: This method is responsible to create a synchronization
+           barrier for the create_model_async method, delete_model method.
+
+           name: Represents the model name.
+           timeout: Represents the time in seconds to wait for a model creation to finish its run. The -1 value
+           waits until the creation finishes.
+
+           return: JSON object with an error message, a warning message or a
+           correct model result
+        """
+        return self.__observer.wait(name, timeout)

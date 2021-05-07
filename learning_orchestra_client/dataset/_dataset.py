@@ -1,6 +1,6 @@
-from ..observer import Observer
-from .._response_treat import ResponseTreat
-from .._entity_reader import EntityReader
+from ..observe import Observer
+from learning_orchestra_client.util._response_treat import ResponseTreat
+from learning_orchestra_client.util._entity_reader import EntityReader
 import requests
 from typing import Union
 
@@ -25,7 +25,7 @@ class Dataset:
         synchronously, i.e., the caller waits until the dataset is inserted into
         the Learning Orchestra storage mechanism.
 
-        pretty_response: If true return indented string, else return dict.
+        pretty_response: If true it returns a string, otherwise a dictionary.
         dataset_name: Is the name of the dataset file that will be created.
         url: Url to CSV file.
 
@@ -59,7 +59,7 @@ class Dataset:
 
         return: A JSON object with an error or warning message or a URL
         indicating the correct operation (the caller must use such an URL to
-        proceed future checks to verify if the dataset is inserted).
+        proceed future checks to verify if the dataset is inserted - using wait method).
         """
         request_body = {self.__DATASET_NAME: dataset_name,
                         self.__URL: url}
@@ -74,7 +74,7 @@ class Dataset:
         description: This method retrieves all datasets metadata, i.e., it does
         not retrieve the dataset content.
 
-        pretty_response: If true return indented string, else return dict.
+        pretty_response: If true it returns a string, otherwise a dictionary.
 
         return: All datasets metadata stored in Learning Orchestra or an empty
         result.
@@ -82,7 +82,7 @@ class Dataset:
         response = self.__entity_reader.read_all_instances_from_entity()
         return self.__response_treat.treatment(response, pretty_response)
 
-    def delete_dataset_async(self, dataset_name, pretty_response=False) \
+    def delete_dataset(self, dataset_name, pretty_response=False) \
             -> Union[dict, str]:
         """
         description: This method is responsible for deleting the dataset.
@@ -92,7 +92,7 @@ class Dataset:
          dataset was used by another task (Ex. projection, histogram, pca, tune
          and so forth), it cannot be deleted.
 
-        pretty_response: If true return indented string, else return dict.
+        pretty_response: If true it returns a string, otherwise a dictionary.
         dataset_name: Represents the dataset name.
 
         return: JSON object with an error message, a warning message or a
@@ -115,7 +115,7 @@ class Dataset:
         description:  This method is responsible for retrieving the dataset
         content
 
-        pretty_response: If true return indented string, else return dict.
+        pretty_response: If true it returns a string, otherwise a dictionary.
         dataset_name: Is the name of the dataset file.
         query: Query to make in MongoDB(default: empty query)
         limit: Number of rows to return in pagination(default: 10) (maximum is
@@ -132,5 +132,16 @@ class Dataset:
 
         return self.__response_treat.treatment(response, pretty_response)
 
-    def wait(self, dataset_name: str) -> dict:
-        return self.__observer.wait(dataset_name)
+    def wait(self, dataset_name: str, timeout: str) -> dict:
+        """
+           description: This method is responsible to create a synchronization
+           barrier for the insert_dataset_async method.
+
+           dataset_name: Represents the dataset name.
+           timeout: Represents the time in seconds to wait for a dataset download to finish its run. The -1 value
+           waits until the download finishes.
+
+           return: JSON object with an error message, a warning message or a
+           correct execution of a pipeline
+        """
+        return self.__observer.wait(dataset_name, timeout)
