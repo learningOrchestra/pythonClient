@@ -1,7 +1,7 @@
 from learning_orchestra_client.dataset.csv import DatasetCsv
 from learning_orchestra_client.transform.projection import TransformProjection
 from learning_orchestra_client.transform.data_type import TransformDataType
-from learning_orchestra_client.builder import BuilderSparkMl
+from learning_orchestra_client.builder.builder import BuilderSparkMl
 
 CLUSTER_IP = "http://35.193.116.104"
 
