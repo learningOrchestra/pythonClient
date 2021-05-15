@@ -25,7 +25,7 @@ Furthermore, some extra method calls are included into Python client API to simp
 even more the Machine Learning services. For instance, the REST API is asynchronous, 
 except for GET HTTP requests, but the Python client enables also the synchronous API calls. 
 The wait API method, useful to receive notifications from ML pipes, is another important 
-example to ilustrate an extension of the original REST API. 
+example to illustrate an extension of the original REST API. 
 
 
 # Example
