@@ -1,5 +1,5 @@
-from learning_orchestra_client.util._response_treat import ResponseTreat
-from learning_orchestra_client.util._entity_reader import EntityReader
+from learning_orchestra_client._util._response_treat import ResponseTreat
+from learning_orchestra_client._util._entity_reader import EntityReader
 from learning_orchestra_client.observe.observe import Observer
 import requests
 from typing import Union
