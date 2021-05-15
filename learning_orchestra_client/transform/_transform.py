@@ -1,4 +1,4 @@
-from ..observe import Observer
+from learning_orchestra_client.observe.observe import Observer
 from learning_orchestra_client.util._response_treat import ResponseTreat
 from learning_orchestra_client.util._entity_reader import EntityReader
 import requests
@@ -21,21 +21,23 @@ class Transform:
         self.__observer = Observer(self.__cluster_ip)
 
     def create_transform_sync(self,
-                             name: str,
-                             model_name:str,
-                             parent_name: str,
-                             method_name: str,
-                             parameters: dict,
-                             description: str = "",
-                             pretty_response: bool = False) -> \
+                              name: str,
+                              model_name: str,
+                              parent_name: str,
+                              method_name: str,
+                              parameters: dict,
+                              description: str = "",
+                              pretty_response: bool = False) -> \
             Union[dict, str]:
         """
-        description: This method is responsible to transform datasets in sync mode
+        description: This method is responsible to transform datasets in sync
+        mode
 
         pretty_response: If true it returns a string, otherwise a dictionary.
         name: Is the name of the transform output object that will be created.
         parent_name: Is the name of the previous ML step of the pipeline
-        method_name: is the name of the method to be executed (the ML tool way to transform datasets)
+        method_name: is the name of the method to be executed
+        (the ML tool way to transform datasets)
         parameters: Is the set of parameters used by the method
 
         return: A JSON object with an error or warning message or a URL
@@ -57,22 +59,24 @@ class Transform:
         return self.__response_treat.treatment(response, pretty_response)
 
     def create_transform_async(self,
-                              name: str,
-                              model_name: str,
-                              parent_name: str,
-                              method_name: str,
-                              parameters: dict,
-                              description: str = "",
-                              pretty_response: bool = False) -> \
+                               name: str,
+                               model_name: str,
+                               parent_name: str,
+                               method_name: str,
+                               parameters: dict,
+                               description: str = "",
+                               pretty_response: bool = False) -> \
             Union[dict, str]:
         """
-        description: This method is responsible to transform datasets in async mode.
-        The wait method must be called to guarantee a synchronization barrier
+        description: This method is responsible to transform datasets in async
+        mode. The wait method must be called to guarantee a synchronization
+        barrier.
 
         pretty_response: If true it returns a string, otherwise a dictionary.
         name: Is the name of the transform output object that will be created.
         parent_name: Is the name of the previous ML step of the pipeline
-        method_name: is the name of the method to be executed (the ML tool way to transform datasets)
+        method_name: is the name of the method to be executed (the ML tool way
+        to transform datasets)
         parameters: Is the set of parameters used by the method
 
         return: A JSON object with an error or warning message or a URL
@@ -125,15 +129,16 @@ class Transform:
         return self.__response_treat.treatment(response, pretty_response)
 
     def search_transform_content(self,
-                                name: str,
-                                query: dict = {},
-                                limit: int = 10,
-                                skip: int = 0,
-                                pretty_response: bool = False) \
+                                 name: str,
+                                 query: dict = {},
+                                 limit: int = 10,
+                                 skip: int = 0,
+                                 pretty_response: bool = False) \
             -> Union[dict, str]:
         """
-        description:  This method is responsible for retrieving a transform URL, which is useful
-        to obtain the transform plottable content, as well as the metadata content
+        description:  This method is responsible for retrieving a transform
+        URL, which is useful to obtain the transform plottable content, as well
+        as the metadata content
 
         pretty_response: If true it returns a string, otherwise a dictionary.
         name: Is the name of the transform object
@@ -142,23 +147,24 @@ class Transform:
         set at 20 rows per request)
         skip: Number of rows to skip in pagination(default: 0)
 
-        return A page with transform content and metadata inside or an error if there
-        is no such train object. The current page is also returned to be used in
-        future content requests.
+        return A page with transform content and metadata inside or an error if
+        there is no such train object. The current page is also returned to be
+        used in future content requests.
         """
         response = self.__entity_reader.read_entity_content(
             name, query, limit, skip)
 
         return self.__response_treat.treatment(response, pretty_response)
 
-    def wait(self, name: str, timeout: str) -> dict:
+    def wait(self, name: str, timeout: int = None) -> dict:
         """
            description: This method is responsible to create a synchronization
-           barrier for the create_transform_async method, delete_transform method.
+           barrier for the create_transform_async method, delete_transform
+           method.
 
            name: Represents the transform name.
-           timeout: Represents the time in seconds to wait for a transform step to finish its run. The -1 value
-           waits until the transformation finishes.
+           timeout: Represents the time in seconds to wait for a transform step
+           to finish its run.
 
            return: JSON object with an error message, a warning message or a
            correct transform result

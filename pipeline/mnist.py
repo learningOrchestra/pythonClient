@@ -245,7 +245,6 @@ function_python.run_function_async(
     code=show_mnist_predict
 )
 
-
 show_mnist_evaluate = '''
 print(mnist_evaluated)
 response = None

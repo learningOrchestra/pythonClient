@@ -2,12 +2,6 @@ from ._evaluate import Evaluate
 
 
 class EvaluateScikitLearn(Evaluate):
-    __PARENT_NAME_FIELD = "parentName"
-    __METHOD_NAME_FIELD = "method"
-    __ClASS_PARAMETERS_FIELD = "methodParameters"
-    __NAME_FIELD = "name"
-    __DESCRIPTION_FIELD = "description"
-
     def __init__(self, cluster_ip: str):
         self.__api_path = "/api/learningOrchestra/v1/evaluate/scikitlearn"
         self.__cluster_ip = cluster_ip

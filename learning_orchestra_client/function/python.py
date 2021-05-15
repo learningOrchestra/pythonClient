@@ -1,4 +1,4 @@
-from ..observe import Observer
+from learning_orchestra_client.observe.observe import Observer
 from learning_orchestra_client.util._response_treat import ResponseTreat
 from learning_orchestra_client.util._entity_reader import EntityReader
 import requests
@@ -26,14 +26,18 @@ class FunctionPython:
                           description: str = "",
                           pretty_response: bool = False) -> Union[dict, str]:
         """
-        description: This method runs a python 3 code in sync mode, so it represents a
-        wildcard for the data scientist. It can be used when train, predict, tune, explore
-        or any other pipe must be customized. The function is also useful for new pipes.
-        pretty_response: If true it returns a string, otherwise a dictionary.
-        name: Is the name of the object stored in Learning Orchestra storage system (volume or mongoDB).
+        description: This method runs a python 3 code in sync mode, so it
+        represents a wildcard for the data scientist. It can be used when
+        train, predict, tune, explore or any other pipe must be customized. The
+        function is also useful for new pipes. pretty_response: If true it
+        returns a string, otherwise a dictionary.
+
+        name: Is the name of the object stored in Learning Orchestra storage
+        system (volume or mongoDB).
         url: Url to CSV file.
 
-        return: A JSON object with an error or warning message or the correct operation result.
+        return: A JSON object with an error or warning message or the correct
+        operation result.
         """
         request_body = {
             self.__NAME_FIELD: name,
@@ -53,17 +57,20 @@ class FunctionPython:
                            code: str,
                            description: str = "",
                            pretty_response: bool = False) -> Union[dict, str]:
-         """
-        description: This method runs a python 3 code in async mode, so it represents a
-        wildcard for the data scientist. It does not lock the caller, so a wait method must be
-        used. It can be used when train, predict, tune, explore
-        or any other pipe must be customized. The function is also useful for new pipes.
+        """
+        description: This method runs a python 3 code in async mode, so it
+        represents a wildcard for the data scientist. It does not lock the
+        caller, so a wait method must be used. It can be used when train,
+        predict, tune, explore or any other pipe must be customized. The
+        function is also useful for new pipes.
+
         pretty_response: If true it returns a string, otherwise a dictionary.
         name: Is the name of the function to be called
         code: the Python code
         parameters: the parameters of the function being called
 
-        return: A JSON object with an error or warning message or the correct operation result.
+        return: A JSON object with an error or warning message or the correct
+        operation result.
         """
         request_body = {
             self.__NAME_FIELD: name,
@@ -79,13 +86,13 @@ class FunctionPython:
     def search_all_executions(self, pretty_response: bool = False) \
             -> Union[dict, str]:
         """
-        description: This method retrieves all created functions metadata, i.e., it does
-        not retrieve the function result content.
+        description: This method retrieves all created functions metadata,
+        i.e., it does not retrieve the function result content.
 
         pretty_response: If true it returns a string, otherwise a dictionary.
 
-        return: All function executions metadata stored in Learning Orchestra or an empty
-        result.
+        return: All function executions metadata stored in Learning Orchestra
+        or an empty result.
         """
         response = self.__entity_reader.read_all_instances_from_entity()
         return self.__response_treat.treatment(response, pretty_response)
@@ -119,7 +126,8 @@ class FunctionPython:
             -> Union[dict, str]:
         """
         description:  This method is responsible for retrieving the function
-        results, including metadata. A function is executed many times, using different parameters,
+        results, including metadata. A function is executed many times, using
+        different parameters,
         thus many results are stored
         in Learning Orchestra.
 
@@ -130,7 +138,8 @@ class FunctionPython:
         set at 20 rows per request)
         skip: Number of rows to skip in pagination(default: 0)
 
-        return A page with some function results inside or an error if there
+        return:
+         A page with some function results inside or an error if there
         is no such function. The current page is also returned to be used in
         future content requests.
         """
@@ -140,14 +149,14 @@ class FunctionPython:
 
         return self.__response_treat.treatment(response, pretty_response)
 
-    def wait(self, dataset_name: str, timeout: str) -> dict:
+    def wait(self, dataset_name: str, timeout: int = None) -> dict:
         """
            description: This method is responsible to create a synchronization
            barrier for the run_function_async method or delete_function method.
 
            name: Represents the function name.
-           timeout: Represents the time in seconds to wait for a function to finish its run. The -1 value
-           waits until the function finishes.
+           timeout: Represents the time in seconds to wait for a function to
+           finish its run.
 
            return: JSON object with an error message, a warning message or a
            correct function result

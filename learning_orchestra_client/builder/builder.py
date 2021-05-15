@@ -1,4 +1,4 @@
-from learning_orchestra_client.observe import Observer
+from learning_orchestra_client.observe.observe import Observer
 from learning_orchestra_client.util._response_treat import ResponseTreat
 from learning_orchestra_client.util._entity_reader import EntityReader
 import requests
@@ -27,9 +27,10 @@ class BuilderSparkMl:
                           pretty_response: bool = False) -> Union[dict, str]:
         """
         description: This method call runs several steps of a machine
-        learning pipeline (transform, tune, train and evaluate, for instance) using
-        a model code and several classifiers. It represents a way to run an entire pipeline.
-        The caller waits until the method execution ends, since it is a synchronous method.
+        learning pipeline (transform, tune, train and evaluate, for instance)
+        using a model code and several classifiers. It represents a way to run
+        an entire pipeline. The caller waits until the method execution ends,
+        since it is a synchronous method.
 
         train_dataset_name: Represent final train dataset.
         test_dataset_name: Represent final test dataset.
@@ -62,9 +63,10 @@ class BuilderSparkMl:
                            pretty_response: bool = False) -> Union[dict, str]:
         """
         description: This method call runs several steps of a machine
-        learning pipeline (transform, tune, train and evaluate, for instance) using
-        a model code and several classifiers. It represents a way to run an entire pipeline.
-        The caller does not wait until the method execution ends, since it is an asynchronous method.
+        learning pipeline (transform, tune, train and evaluate, for instance)
+        using a model code and several classifiers. It represents a way to run
+        an entire pipeline. The caller does not wait until the method execution
+        ends, since it is an asynchronous method.
 
         train_dataset_name: Represent final train dataset.
         test_dataset_name: Represent final test dataset.
@@ -120,9 +122,9 @@ class BuilderSparkMl:
         set at 20 rows per request)
         skip: Number of rows to skip in pagination(default: 0)
 
-        return: A page with some tuples or registers inside or an error if the pipeline runs
-        incorrectly. The current page is also returned to be used in
-        future content requests.
+        return: A page with some tuples or registers inside or an error if the
+        pipeline runs incorrectly. The current page is also returned to be used
+        in future content requests.
         """
 
         response = self.__entity_reader.read_entity_content(
@@ -171,17 +173,16 @@ class BuilderSparkMl:
 
         return self.__response_treat.treatment(response, pretty_response)
 
-    def wait(self, dataset_name: str, timeout: str) -> dict:
+    def wait(self, dataset_name: str, timeout: int = None) -> dict:
         """
            description: This method is responsible to create a synchronization
            barrier for the run_spark_ml_async method.
 
            dataset_name: Represents the pipeline name.
-           timeout: Represents the time in seconds to wait for a builder to finish its run. The -1 value
-           waits until the builder finishes.
+           timeout: Represents the time in seconds to wait for a builder to
+           finish its run.
 
            return: JSON object with an error message, a warning message or a
            correct execution of a pipeline
         """
         return self.__observer.wait(dataset_name, timeout)
-

@@ -1,4 +1,4 @@
-from ..observe import Observer
+from learning_orchestra_client.observe.observe import Observer
 from learning_orchestra_client.util._response_treat import ResponseTreat
 from learning_orchestra_client.util._entity_reader import EntityReader
 import requests
@@ -32,8 +32,10 @@ class Model:
         pretty_response: If true it returns a string, otherwise a dictionary.
         name: Is the name of the model that will be created.
         class_name: is the name of the class to be executed
-        module_path: The name of the package of the ML tool used (Ex. Scikit-learn or TensorFlow)
-        class_parameters: the set of parameters of the ML class defined previously
+        module_path: The name of the package of the ML tool used
+        (Ex. Scikit-learn or TensorFlow)
+        class_parameters: the set of parameters of the ML class defined
+        previously
 
         return: A JSON object with an error or warning message or a URL
         indicating the correct operation.
@@ -60,14 +62,16 @@ class Model:
                            description: str = "",
                            pretty_response: bool = False) -> Union[dict, str]:
         """
-        description: This method runs a model creation in async mode, thus it requires a
-        wait method call
+        description: This method runs a model creation in async mode, thus it
+        requires a wait method call
 
         pretty_response: If true it returns a string, otherwise a dictionary.
         name: Is the name of the model that will be created.
         class_name: is the name of the class to be executed
-        module_path: The name of the package of the ML tool used (Ex. Scikit-learn or TensorFlow)
-        class_parameters: the set of parameters of the ML class defined previously
+        module_path: The name of the package of the ML tool used
+        (Ex. Scikit-learn or TensorFlow)
+        class_parameters: the set of parameters of the ML class defined
+        previously
 
         return: A JSON object with an error or warning message or a URL
         indicating the future correct operation.
@@ -119,9 +123,7 @@ class Model:
         response = requests.delete(request_url)
         return self.__response_treat.treatment(response, pretty_response)
 
-    def search_model(self,
-                             name: str,
-                             pretty_response: bool = False) \
+    def search_model(self, name: str, pretty_response: bool = False) \
             -> Union[dict, str]:
         """
         description: This method retrieves a model metadata, i.e., it does
@@ -139,14 +141,14 @@ class Model:
 
         return self.__response_treat.treatment(response, pretty_response)
 
-    def wait(self, name: str, timeout: str) -> dict:
+    def wait(self, name: str, timeout: int = None) -> dict:
         """
            description: This method is responsible to create a synchronization
            barrier for the create_model_async method, delete_model method.
 
            name: Represents the model name.
-           timeout: Represents the time in seconds to wait for a model creation to finish its run. The -1 value
-           waits until the creation finishes.
+           timeout: Represents the time in seconds to wait for a model creation
+           to finish its run.
 
            return: JSON object with an error message, a warning message or a
            correct model result

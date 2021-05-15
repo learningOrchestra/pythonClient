@@ -1,5 +1,5 @@
 from learning_orchestra_client.util._response_treat import ResponseTreat
-from ..observe import Observer
+from learning_orchestra_client.observe.observe import Observer
 from learning_orchestra_client.util._entity_reader import EntityReader
 import requests
 from typing import Union
@@ -58,9 +58,9 @@ class TransformProjection:
             -> Union[dict, str]:
         """
         description: This method removes a set of attributes of a dataset
-        asynchronously; this way, the caller does not wait until the projection is inserted into
-        the Learning Orchestra storage mechanism. A wait method call must occur to guarantee a
-        synchronization barrier.
+        asynchronously; this way, the caller does not wait until the projection
+        is inserted into the Learning Orchestra storage mechanism. A wait
+        method call must occur to guarantee a synchronization barrier.
 
         pretty_response: If returns true a string, otherwise a dictionary.
         projection_name: Represents the projection name.
@@ -69,7 +69,8 @@ class TransformProjection:
         with some attributes.
 
         return: A JSON object with error or warning messages. In case of
-        success, it returns the projection URL to be obtained latter with a wait method call.
+        success, it returns the projection URL to be obtained latter with a
+        wait method call.
         """
 
         request_body = {
@@ -85,8 +86,8 @@ class TransformProjection:
     def search_all_projections(self, pretty_response: bool = False) \
             -> Union[dict, str]:
         """
-        description: This method retrieves all projection metadata, i.e., it does not
-        retrieve the projection content.
+        description: This method retrieves all projection metadata, i.e., it
+        does not retrieve the projection content.
 
         pretty_response: If true it returns a string, otherwise a dictionary.
 
@@ -97,11 +98,11 @@ class TransformProjection:
         return self.__response_treat.treatment(response, pretty_response)
 
     def search_projection_content(self,
-                                   projection_name: str,
-                                   query: dict = {},
-                                   limit: int = 10,
-                                   skip: int = 0,
-                                   pretty_response: bool = False) \
+                                  projection_name: str,
+                                  query: dict = {},
+                                  limit: int = 10,
+                                  skip: int = 0,
+                                  pretty_response: bool = False) \
             -> Union[dict, str]:
         """
         description: This method is responsible for retrieving the projection
@@ -125,7 +126,7 @@ class TransformProjection:
         return self.__response_treat.treatment(response, pretty_response)
 
     def delete_projection(self, projection_name: str,
-                           pretty_response: bool = False) \
+                          pretty_response: bool = False) \
             -> Union[dict, str]:
         """
         description: This method is responsible for deleting a projection.
@@ -145,14 +146,15 @@ class TransformProjection:
 
         return self.__response_treat.treatment(response, pretty_response)
 
-    def wait(self, projection_name: str, timeout: str) -> dict:
+    def wait(self, projection_name: str, timeout: int = None) -> dict:
         """
            description: This method is responsible to create a synchronization
-           barrier for the remove_dataset_attributes_async method, delete_projection method.
+           barrier for the remove_dataset_attributes_async method,
+           delete_projection method.
 
            name: Represents the projection name.
-           timeout: Represents the time in seconds to wait for a projection to finish its run. The -1 value
-           waits until the projection operation finishes.
+           timeout: Represents the time in seconds to wait for a projection to
+           finish its run.
 
            return: JSON object with an error message, a warning message or a
            correct projection result

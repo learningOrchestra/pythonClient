@@ -1,4 +1,4 @@
-from ..observe import Observer
+from learning_orchestra_client.observe.observe import Observer
 from learning_orchestra_client.util._response_treat import ResponseTreat
 from learning_orchestra_client.util._entity_reader import EntityReader
 import requests
@@ -36,7 +36,8 @@ class Predict:
         pretty_response: If true it returns a string, otherwise a dictionary.
         name: Is the name of the prediction output object that will be created.
         parent_name: Is the name of the previous ML step of the pipeline
-        method_name: is the name of the method to be executed (the ML tool way to predict models)
+        method_name: is the name of the method to be executed (the ML tool way
+        to predict models)
         parameters: Is the set of parameters used by the method
 
         return: A JSON object with an error or warning message or a URL
@@ -73,7 +74,8 @@ class Predict:
         pretty_response: If true it returns a string, otherwise a dictionary.
         name: Is the name of the prediction output object that will be created.
         parent_name: Is the name of the previous ML step of the pipeline
-        method_name: is the name of the method to be executed (the ML tool way to predict models)
+        method_name: is the name of the method to be executed (the ML tool way
+        to predict models)
         parameters: Is the set of parameters used by the method
 
         return: A JSON object with an error or warning message or a URL
@@ -95,8 +97,8 @@ class Predict:
     def search_all_predictions(self, pretty_response: bool = False) \
             -> Union[dict, str]:
         """
-        description: This method retrieves all predictions metadata, i.e., it does
-        not retrieve the prediction content.
+        description: This method retrieves all predictions metadata, i.e., it
+        does not retrieve the prediction content.
 
         pretty_response: If true it returns a string, otherwise a dictionary.
 
@@ -133,8 +135,8 @@ class Predict:
                                   pretty_response: bool = False) \
             -> Union[dict, str]:
         """
-        description:  This method is responsible for retrieving all the prediction
-        tuples or registers, as well as the metadata content
+        description:  This method is responsible for retrieving all the
+        prediction tuples or registers, as well as the metadata content
 
         pretty_response: If true it returns a string, otherwise a dictionary.
         name: Is the name of the prediction object
@@ -143,23 +145,24 @@ class Predict:
         set at 20 rows per request)
         skip: Number of rows to skip in pagination(default: 0)
 
-        return A page with some predictions inside or an error if there
-        is no such prediction object. The current page is also returned to be used in
-        future content requests.
+        return: A page with some predictions inside or an error if there
+        is no such prediction object. The current page is also returned to be
+        used in future content requests.
         """
         response = self.__entity_reader.read_entity_content(
             name, query, limit, skip)
 
         return self.__response_treat.treatment(response, pretty_response)
 
-    def wait(self, name: str, timeout: str) -> dict:
+    def wait(self, name: str, timeout: int = None) -> dict:
         """
            description: This method is responsible to create a synchronization
-           barrier for the create_prediction_async method, delete_prediction method.
+           barrier for the create_prediction_async method, delete_prediction
+           method.
 
            name: Represents the prediction name.
-           timeout: Represents the time in seconds to wait for a prediction to finish its run. The -1 value
-           waits until the prediction finishes.
+           timeout: Represents the time in seconds to wait for a prediction to
+           finish its run.
 
            return: JSON object with an error message, a warning message or a
            correct prediction result
