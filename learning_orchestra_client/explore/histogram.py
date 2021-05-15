@@ -1,8 +1,8 @@
 from learning_orchestra_client.observe.observe import Observer
-from learning_orchestra_client.util._response_treat import ResponseTreat
+from learning_orchestra_client._util._response_treat import ResponseTreat
 import requests
 from typing import Union
-from learning_orchestra_client.util._entity_reader import EntityReader
+from learning_orchestra_client._util._entity_reader import EntityReader
 
 
 class ExploreHistogram:
