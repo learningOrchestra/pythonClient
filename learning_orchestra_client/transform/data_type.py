@@ -1,6 +1,6 @@
 from learning_orchestra_client.util._response_treat import ResponseTreat
 from learning_orchestra_client.util._entity_reader import EntityReader
-from ..observe import Observer
+from learning_orchestra_client.observe.observe import Observer
 import requests
 from typing import Union
 
@@ -18,18 +18,20 @@ class TransformDataType:
         self.__observer = Observer(self.__cluster_ip)
 
     def update_dataset_type_sync(self,
-                             dataset_name: str,
-                             types: dict,
-                             pretty_response: bool = False) \
+                                 dataset_name: str,
+                                 types: dict,
+                                 pretty_response: bool = False) \
             -> Union[dict, str]:
         """
-        description: Change dataset field types (from number to string and vice-versa).
-        Many type modifications can be performed in one method call.
+        description: Change dataset field types (from number to string and
+        vice-versa). Many type modifications can be performed in one method
+        call.
 
         dataset_name: Represents the dataset name.
         types: Represents a map, where the pair key:value is a field:type
 
-        return: A JSON object with error or warning messages or a correct datatype result.
+        return: A JSON object with error or warning messages or a correct
+        datatype result.
         """
         url_request = self.__service_url
         body_request = {
@@ -43,20 +45,21 @@ class TransformDataType:
         return self.__response_treat.treatment(response, pretty_response)
 
     def update_dataset_type_async(self,
-                             dataset_name: str,
-                             types: dict,
-                             pretty_response: bool = False) \
+                                  dataset_name: str,
+                                  types: dict,
+                                  pretty_response: bool = False) \
             -> Union[dict, str]:
         """
-        description: Change dataset field types (from number to string and vice-versa).
-        Many type modifications can be performed in one method call. Is is an
-        asynchronous call, thus a wait method must be also called to guarantee a
-        synchronization barrier.
+        description: Change dataset field types (from number to string and
+        vice-versa). Many type modifications can be performed in one method
+        call. Is is an asynchronous call, thus a wait method must be also
+        called to guarantee a synchronization barrier.
 
         dataset_name: Represents the dataset name.
         types: Represents a map, where the pair key:value is a field:type
 
-        return: A JSON object with error or warning messages or a correct datatype result.
+        return: A JSON object with error or warning messages or a correct
+        datatype result.
         """
         url_request = self.__service_url
         body_request = {
@@ -118,23 +121,24 @@ class TransformDataType:
         set at 20 rows per request)
         skip: Number of rows to skip in pagination(default: 0)
 
-        return A page with some registers or tuples inside or an error if there
-        is no such datatype object. The current page is also returned to be used in
-        future content requests.
+        return: A page with some registers or tuples inside or an error if there
+        is no such datatype object. The current page is also returned to be
+        used in future content requests.
         """
         response = self.__entity_reader.read_entity_content(
             name, query, limit, skip)
 
         return self.__response_treat.treatment(response, pretty_response)
 
-    def wait(self, dataset_name: str, timeout: str) -> dict:
+    def wait(self, dataset_name: str, timeout: int = None) -> dict:
         """
            description: This method is responsible to create a synchronization
-           barrier for the update_dataset_type_async method, delete_datatype method.
+           barrier for the update_dataset_type_async method, delete_datatype
+           method.
 
            name: Represents the datatype name.
-           timeout: Represents the time in seconds to wait for a datatype to finish its run. The -1 value
-           waits until the datatype operation finishes.
+           timeout: Represents the time in seconds to wait for a datatype to
+           finish its run.
 
            return: JSON object with an error message, a warning message or a
            correct datatype result

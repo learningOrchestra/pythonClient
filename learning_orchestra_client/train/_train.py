@@ -1,4 +1,4 @@
-from ..observe import Observer
+from learning_orchestra_client.observe.observe import Observer
 from learning_orchestra_client.util._response_treat import ResponseTreat
 from learning_orchestra_client.util._entity_reader import EntityReader
 import requests
@@ -22,7 +22,7 @@ class Train:
 
     def create_training_sync(self,
                              name: str,
-                             model_name:str,
+                             model_name: str,
                              parent_name: str,
                              method_name: str,
                              parameters: dict,
@@ -35,7 +35,8 @@ class Train:
         pretty_response: If true it returns a string, otherwise a dictionary.
         name: Is the name of the train output object that will be created.
         parent_name: Is the name of the previous ML step of the pipeline
-        method_name: is the name of the method to be executed (the ML tool way to train models)
+        method_name: is the name of the method to be executed (the ML tool way
+        to train models)
         parameters: Is the set of parameters used by the method
 
         return: A JSON object with an error or warning message or a URL
@@ -72,7 +73,8 @@ class Train:
         pretty_response: If true it returns a string, otherwise a dictionary.
         name: Is the name of the train output object that will be created.
         parent_name: Is the name of the previous ML step of the pipeline
-        method_name: is the name of the method to be executed (the ML tool way to train models)
+        method_name: is the name of the method to be executed (the ML tool way
+        to train models)
         parameters: Is the set of parameters used by the method
 
         return: A JSON object with an error or warning message or a URL
@@ -142,7 +144,7 @@ class Train:
         set at 20 rows per request)
         skip: Number of rows to skip in pagination(default: 0)
 
-        return A page with some trains inside or an error if there
+        return: A page with some trains inside or an error if there
         is no such train object. The current page is also returned to be used in
         future content requests.
         """
@@ -151,14 +153,14 @@ class Train:
 
         return self.__response_treat.treatment(response, pretty_response)
 
-    def wait(self, name: str, timeout: str) -> dict:
+    def wait(self, name: str, timeout: int = None) -> dict:
         """
            description: This method is responsible to create a synchronization
            barrier for the create_train_async method, delete_train method.
 
            name: Represents the train name.
-           timeout: Represents the time in seconds to wait for a train to finish its run. The -1 value
-           waits until the train finishes.
+           timeout: Represents the time in seconds to wait for a train to
+           finish its run.
 
            return: JSON object with an error message, a warning message or a
            correct train result

@@ -1,4 +1,4 @@
-from ..observe import Observer
+from learning_orchestra_client.observe.observe import Observer
 from learning_orchestra_client.util._response_treat import ResponseTreat
 from learning_orchestra_client.util._entity_reader import EntityReader
 import requests
@@ -21,13 +21,13 @@ class Explore:
         self.__observer = Observer(self.__cluster_ip)
 
     def create_explore_sync(self,
-                             name: str,
-                             model_name: str,
-                             parent_name: str,
-                             method_name: str,
-                             parameters: dict,
-                             description: str = "",
-                             pretty_response: bool = False) -> \
+                            name: str,
+                            model_name: str,
+                            parent_name: str,
+                            method_name: str,
+                            parameters: dict,
+                            description: str = "",
+                            pretty_response: bool = False) -> \
             Union[dict, str]:
         """
         description: This method runs an evaluation about a model in sync mode
@@ -57,16 +57,17 @@ class Explore:
         return self.__response_treat.treatment(response, pretty_response)
 
     def create_explore_async(self,
-                              name: str,
-                              model_name: str,
-                              parent_name: str,
-                              method_name: str,
-                              parameters: dict,
-                              description: str = "",
-                              pretty_response: bool = False) -> \
+                             name: str,
+                             model_name: str,
+                             parent_name: str,
+                             method_name: str,
+                             parameters: dict,
+                             description: str = "",
+                             pretty_response: bool = False) -> \
             Union[dict, str]:
         """
-        description: This method runs an explore service about a model in async mode
+        description: This method runs an explore service about a model in async
+        mode
 
         pretty_response: If true it returns a string, otherwise a dictionary.
         name: Is the name of the model that will be explored.
@@ -93,8 +94,8 @@ class Explore:
     def search_all_explores(self, pretty_response: bool = False) \
             -> Union[dict, str]:
         """
-        description: This method retrieves all created explorations, i.e., it does
-        not retrieve the specific explore content.
+        description: This method retrieves all created explorations, i.e., it
+        does not retrieve the specific explore content.
 
         pretty_response: If true it returns a string, otherwise a dictionary.
 
@@ -110,9 +111,9 @@ class Explore:
         description: This method is responsible for deleting an explore result.
         This delete operation is asynchronous, so it does not lock the caller
          until the deletion finished. Instead, it returns a JSON object with a
-         URL for a future use. The caller uses the wait method for delete checks. If a
-         dataset was used by another task (Ex. projection, histogram, pca, tune
-         and so forth), it cannot be deleted.
+         URL for a future use. The caller uses the wait method for delete
+         checks. If a dataset was used by another task (Ex. projection,
+         histogram, tune and so forth), it cannot be deleted.
 
         pretty_response: If true it returns a string, otherwise a dictionary.
         name: Represents the model name.
@@ -127,17 +128,17 @@ class Explore:
         return self.__response_treat.treatment(response, pretty_response)
 
     def search_explore_image(self,
-                                name: str,
-                                pretty_response: bool = False) \
+                             name: str,
+                             pretty_response: bool = False) \
             -> Union[dict, str]:
         """
         description:  This method is responsible for retrieving the explore
         image to be plotted
 
         pretty_response: If true it returns a string, otherwise a dictionary.
-        name: Is the name of the model.
+        name: Is the name of the explore instance.
 
-        return An URL with a link for an image or an error if there
+        return: An URL with a link for an image or an error if there
         is no such result.
         """
 
@@ -146,16 +147,37 @@ class Explore:
 
         return self.__response_treat.treatment(response, pretty_response)
 
-    def wait(self, name: str, timeout: str) -> dict:
+    def search_explore_metadata(self,
+                                name: str,
+                                pretty_response: bool = False) \
+            -> Union[dict, str]:
         """
-           description: This method is responsible to create a synchronization
-           barrier for the create_explore_async method, delete_explore_async method.
+        description:  This method is responsible for retrieving the explore
+        metadata image.
 
-           name: Represents the model name.
-           timeout: Represents the time in seconds to wait for an explore to finish its run. The -1 value
-           waits until the explore finishes.
+        pretty_response: If true it returns a string, otherwise a dictionary.
+        name: Is the name of the explore instance.
 
-           return: JSON object with an error message, a warning message or a
-           correct explore result (the image URL as an explore result)
+        return: A page with some metadata inside or an error if there
+        is no such dataset. The current page is also returned to be used in
+        future content requests.
+        """
+
+        response = self.__entity_reader.read_explore_image_metadata(name)
+
+        return self.__response_treat.treatment(response, pretty_response)
+
+    def wait(self, name: str, timeout: int = None) -> dict:
+        """
+       description: This method is responsible to create a synchronization
+       barrier for the create_explore_async method, delete_explore_async
+       method.
+
+       name: Represents the model name.
+       timeout: Represents the time in seconds to wait for an explore to
+       finish its run.
+
+       return: JSON object with an error message, a warning message or a
+       correct explore result (the image URL as an explore result)
         """
         return self.__observer.wait(name, timeout)

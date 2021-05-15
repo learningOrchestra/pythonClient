@@ -3,6 +3,7 @@ from requests import Response
 import logging
 from typing import Union
 
+
 class ResponseTreat:
     HTTP_CREATED = 201
     HTTP_SUCCESS = 200

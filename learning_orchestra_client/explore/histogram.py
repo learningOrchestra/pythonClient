@@ -1,4 +1,4 @@
-from ..observe import Observer
+from learning_orchestra_client.observe.observe import Observer
 from learning_orchestra_client.util._response_treat import ResponseTreat
 import requests
 from typing import Union
@@ -58,8 +58,8 @@ class ExploreHistogram:
             -> Union[dict, str]:
         """
         description: This method creates a histogram
-        asynchronously, so the caller does not wait until the histogram is inserted into
-        the Learning Orchestra storage mechanism.
+        asynchronously, so the caller does not wait until the histogram is
+        inserted into the Learning Orchestra storage mechanism.
 
         dataset_name: Represents the name of dataset.
         histogram_name: Represents the name of histogram.
@@ -143,14 +143,15 @@ class ExploreHistogram:
 
         return self.__response_treat.treatment(response, pretty_response)
 
-    def wait(self, name: str, timeout: str) -> dict:
+    def wait(self, name: str, timeout: int = None) -> dict:
         """
            description: This method is responsible to create a synchronization
-           barrier for the run_histogram_async method or delete_histogram method.
+           barrier for the run_histogram_async method or delete_histogram
+           method.
 
            name: Represents the histogram name.
-           timeout: Represents the time in seconds to wait for a histogram to finish its run. The -1 value
-           waits until the histogram finishes.
+           timeout: Represents the time in seconds to wait for a histogram to
+           finish its run.
 
            return: JSON object with an error message, a warning message or a
            correct histogram result

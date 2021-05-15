@@ -1,4 +1,4 @@
-from ..observe import Observer
+from learning_orchestra_client.observe.observe import Observer
 from learning_orchestra_client.util._response_treat import ResponseTreat
 from learning_orchestra_client.util._entity_reader import EntityReader
 import requests
@@ -59,7 +59,8 @@ class Dataset:
 
         return: A JSON object with an error or warning message or a URL
         indicating the correct operation (the caller must use such an URL to
-        proceed future checks to verify if the dataset is inserted - using wait method).
+        proceed future checks to verify if the dataset is inserted - using wait
+        method).
         """
         request_body = {self.__DATASET_NAME: dataset_name,
                         self.__URL: url}
@@ -122,7 +123,7 @@ class Dataset:
         set at 20 rows per request)
         skip: Number of rows to skip in pagination(default: 0)
 
-        return A page with some tuples or registers inside or an error if there
+        return: A page with some tuples or registers inside or an error if there
         is no such dataset. The current page is also returned to be used in
         future content requests.
         """
@@ -132,14 +133,14 @@ class Dataset:
 
         return self.__response_treat.treatment(response, pretty_response)
 
-    def wait(self, dataset_name: str, timeout: str) -> dict:
+    def wait(self, dataset_name: str, timeout: int = None) -> dict:
         """
            description: This method is responsible to create a synchronization
            barrier for the insert_dataset_async method.
 
            dataset_name: Represents the dataset name.
-           timeout: Represents the time in seconds to wait for a dataset download to finish its run. The -1 value
-           waits until the download finishes.
+           timeout: Represents the time in seconds to wait for a dataset
+           download to finish its run.
 
            return: JSON object with an error message, a warning message or a
            correct execution of a pipeline
