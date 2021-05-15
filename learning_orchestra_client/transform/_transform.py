@@ -5,9 +5,9 @@ import requests
 from typing import Union
 
 
-class Predict:
-    __MODEL_NAME_FIELD = "modelName"
+class Transform:
     __PARENT_NAME_FIELD = "parentName"
+    __MODEL_NAME_FIELD = "modelName"
     __METHOD_NAME_FIELD = "method"
     __ClASS_PARAMETERS_FIELD = "methodParameters"
     __NAME_FIELD = "name"
@@ -20,24 +20,24 @@ class Predict:
         self.__entity_reader = EntityReader(self.__service_url)
         self.__observer = Observer(self.__cluster_ip)
 
-    def create_prediction_sync(self,
-                               name: str,
-                               model_name: str,
-                               parent_name: str,
-                               method_name: str,
-                               parameters: dict,
-                               description: str = "",
-                               pretty_response: bool = False) -> \
+    def create_transform_sync(self,
+                              name: str,
+                              model_name: str,
+                              parent_name: str,
+                              method_name: str,
+                              parameters: dict,
+                              description: str = "",
+                              pretty_response: bool = False) -> \
             Union[dict, str]:
         """
-        description: This method is responsible to predict models in sync mode
-
+        description: This method is responsible to transform datasets in sync
+        mode
 
         pretty_response: If true it returns a string, otherwise a dictionary.
-        name: Is the name of the prediction output object that will be created.
+        name: Is the name of the transform output object that will be created.
         parent_name: Is the name of the previous ML step of the pipeline
-        method_name: is the name of the method to be executed (the ML tool way
-        to predict models)
+        method_name: is the name of the method to be executed
+        (the ML tool way to transform datasets)
         parameters: Is the set of parameters used by the method
 
         return: A JSON object with an error or warning message or a URL
@@ -58,24 +58,25 @@ class Predict:
 
         return self.__response_treat.treatment(response, pretty_response)
 
-    def create_prediction_async(self,
-                                name: str,
-                                model_name: str,
-                                parent_name: str,
-                                method_name: str,
-                                parameters: dict,
-                                description: str = "",
-                                pretty_response: bool = False) -> \
+    def create_transform_async(self,
+                               name: str,
+                               model_name: str,
+                               parent_name: str,
+                               method_name: str,
+                               parameters: dict,
+                               description: str = "",
+                               pretty_response: bool = False) -> \
             Union[dict, str]:
         """
-        description: This method is responsible to predict models in async mode.
-        A wait method call is mandatory due to the asynchronous aspect.
+        description: This method is responsible to transform datasets in async
+        mode. The wait method must be called to guarantee a synchronization
+        barrier.
 
         pretty_response: If true it returns a string, otherwise a dictionary.
-        name: Is the name of the prediction output object that will be created.
+        name: Is the name of the transform output object that will be created.
         parent_name: Is the name of the previous ML step of the pipeline
         method_name: is the name of the method to be executed (the ML tool way
-        to predict models)
+        to transform datasets)
         parameters: Is the set of parameters used by the method
 
         return: A JSON object with an error or warning message or a URL
@@ -94,30 +95,30 @@ class Predict:
         response = requests.post(url=request_url, json=request_body)
         return self.__response_treat.treatment(response, pretty_response)
 
-    def search_all_predictions(self, pretty_response: bool = False) \
+    def search_all_transformations(self, pretty_response: bool = False) \
             -> Union[dict, str]:
         """
-        description: This method retrieves all predictions metadata, i.e., it
-        does not retrieve the prediction content.
+        description: This method retrieves all transform metadata, i.e., it does
+        not retrieve the transform content.
 
         pretty_response: If true it returns a string, otherwise a dictionary.
 
-        return: All predict metadata stored in Learning Orchestra or an empty
+        return: All transform metadata stored in Learning Orchestra or an empty
         result.
         """
         response = self.__entity_reader.read_all_instances_from_entity()
         return self.__response_treat.treatment(response, pretty_response)
 
-    def delete_prediction(self, name: str, pretty_response=False) \
+    def delete_transform(self, name: str, pretty_response=False) \
             -> Union[dict, str]:
         """
-        description: This method is responsible for deleting the prediction.
+        description: This method is responsible for deleting a transform step.
         This delete operation is asynchronous, so it does not lock the caller
          until the deletion finished. Instead, it returns a JSON object with a
          URL for a future use. The caller uses the URL for delete checks.
 
         pretty_response: If true it returns a string, otherwise a dictionary.
-        name: Represents the prediction name.
+        name: Represents the transform name.
 
         return: JSON object with an error message, a warning message or a
         correct delete message
@@ -127,26 +128,27 @@ class Predict:
         response = requests.delete(request_url)
         return self.__response_treat.treatment(response, pretty_response)
 
-    def search_prediction_content(self,
-                                  name: str,
-                                  query: dict = {},
-                                  limit: int = 10,
-                                  skip: int = 0,
-                                  pretty_response: bool = False) \
+    def search_transform_content(self,
+                                 name: str,
+                                 query: dict = {},
+                                 limit: int = 10,
+                                 skip: int = 0,
+                                 pretty_response: bool = False) \
             -> Union[dict, str]:
         """
-        description:  This method is responsible for retrieving all the
-        prediction tuples or registers, as well as the metadata content
+        description:  This method is responsible for retrieving a transform
+        URL, which is useful to obtain the transform plottable content, as well
+        as the metadata content
 
         pretty_response: If true it returns a string, otherwise a dictionary.
-        name: Is the name of the prediction object
+        name: Is the name of the transform object
         query: Query to make in MongoDB(default: empty query)
         limit: Number of rows to return in pagination(default: 10) (maximum is
         set at 20 rows per request)
         skip: Number of rows to skip in pagination(default: 0)
 
-        return: A page with some predictions inside or an error if there
-        is no such prediction object. The current page is also returned to be
+        return A page with transform content and metadata inside or an error if
+        there is no such train object. The current page is also returned to be
         used in future content requests.
         """
         response = self.__entity_reader.read_entity_content(
@@ -157,14 +159,14 @@ class Predict:
     def wait(self, name: str, timeout: int = None) -> dict:
         """
            description: This method is responsible to create a synchronization
-           barrier for the create_prediction_async method, delete_prediction
+           barrier for the create_transform_async method, delete_transform
            method.
 
-           name: Represents the prediction name.
-           timeout: Represents the time in seconds to wait for a prediction to
-           finish its run.
+           name: Represents the transform name.
+           timeout: Represents the time in seconds to wait for a transform step
+           to finish its run.
 
            return: JSON object with an error message, a warning message or a
-           correct prediction result
+           correct transform result
         """
         return self.__observer.wait(name, timeout)

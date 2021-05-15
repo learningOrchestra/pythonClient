@@ -1,6 +1,6 @@
-from .._response_treat import ResponseTreat
-from ..observer import Observer
-from .._entity_reader import EntityReader
+from learning_orchestra_client.util._response_treat import ResponseTreat
+from learning_orchestra_client.observe.observe import Observer
+from learning_orchestra_client.util._entity_reader import EntityReader
 import requests
 from typing import Union
 
@@ -25,15 +25,15 @@ class TransformProjection:
                                        pretty_response: bool = False) \
             -> Union[dict, str]:
         """
-        description: This method inserts a set of attributes into a dataset
+        description: This method removes a set of attributes of a dataset
         synchronously, the caller waits until the projection is inserted into
         the Learning Orchestra storage mechanism.
 
-        pretty_response: If true return indented string, else return dict.
+        pretty_response: If returns true a string, otherwise a dictionary.
         projection_name: Represents the projection name.
         dataset_name: Represents the dataset name.
-        fields: Represents the set of attributes to be inserted. This is list
-        with all attributes.
+        fields: Represents the set of attributes to be removed. This is list
+        with some attributes.
 
         return: A JSON object with error or warning messages. In case of
         success, it returns the projection metadata.
@@ -57,20 +57,20 @@ class TransformProjection:
                                         pretty_response: bool = False) \
             -> Union[dict, str]:
         """
-        description: This method inserts a set of attributes into a dataset
-        asynchronously, the caller does not wait until the projections is
-        inserted into the Learning Orchestra storage mechanism. Instead,
-        the caller receives a JSON object with a URL to proceed future calls
-        to verify if the projection was inserted.
+        description: This method removes a set of attributes of a dataset
+        asynchronously; this way, the caller does not wait until the projection
+        is inserted into the Learning Orchestra storage mechanism. A wait
+        method call must occur to guarantee a synchronization barrier.
 
-        pretty_response: If true return indented string, else return dict.
+        pretty_response: If returns true a string, otherwise a dictionary.
         projection_name: Represents the projection name.
         dataset_name: Represents the dataset name.
-        fields: Represents the set of attributes to be inserted. This is list
-        with all attributes.
+        fields: Represents the set of attributes to be removed. This is list
+        with some attributes.
 
         return: A JSON object with error or warning messages. In case of
-        success, it returns the projection metadata.
+        success, it returns the projection URL to be obtained latter with a
+        wait method call.
         """
 
         request_body = {
@@ -86,10 +86,10 @@ class TransformProjection:
     def search_all_projections(self, pretty_response: bool = False) \
             -> Union[dict, str]:
         """
-        description: This method retrieves all projection metadata, it does not
-        retrieve the projection content.
+        description: This method retrieves all projection metadata, i.e., it
+        does not retrieve the projection content.
 
-        pretty_response: If true return indented string, else return dict.
+        pretty_response: If true it returns a string, otherwise a dictionary.
 
         return: A list with all projections metadata stored in Learning
         Orchestra or an empty result.
@@ -98,17 +98,17 @@ class TransformProjection:
         return self.__response_treat.treatment(response, pretty_response)
 
     def search_projection_content(self,
-                                   projection_name: str,
-                                   query: dict = {},
-                                   limit: int = 10,
-                                   skip: int = 0,
-                                   pretty_response: bool = False) \
+                                  projection_name: str,
+                                  query: dict = {},
+                                  limit: int = 10,
+                                  skip: int = 0,
+                                  pretty_response: bool = False) \
             -> Union[dict, str]:
         """
-        description: This method is responsible for retrieving the dataset
+        description: This method is responsible for retrieving the projection
         content.
 
-        pretty_response: If true return indented string, else return dict.
+        pretty_response: If true it returns a string, otherwise a dictionary.
         projection_name: Represents the projection name.
         query: Query to make in MongoDB(default: empty query)
         limit: Number of rows to return in pagination(default: 10) (maximum is
@@ -125,17 +125,15 @@ class TransformProjection:
 
         return self.__response_treat.treatment(response, pretty_response)
 
-    def delete_projection_async(self, projection_name: str,
-                           pretty_response: bool = False) \
+    def delete_projection(self, projection_name: str,
+                          pretty_response: bool = False) \
             -> Union[dict, str]:
         """
         description: This method is responsible for deleting a projection.
-        The delete operation is always synchronous because it is very fast,
-        since the deletion is performed in background. If a projection was
-        used by another task (Ex. histogram, pca, tuning and so forth),
-        it cannot be deleted.
+        The delete operation is always asynchronous and performed in background.
 
-        pretty_response: If true return indented string, else return dict.
+
+        pretty_response: If true it returns a string, otherwise a dictionary.
         projection_name: Represents the projection name.
 
         return: JSON object with an error message, a warning message or a
@@ -148,5 +146,17 @@ class TransformProjection:
 
         return self.__response_treat.treatment(response, pretty_response)
 
-    def wait(self, projection_name: str) -> dict:
-        return self.__observer.wait(projection_name)
+    def wait(self, projection_name: str, timeout: int = None) -> dict:
+        """
+           description: This method is responsible to create a synchronization
+           barrier for the remove_dataset_attributes_async method,
+           delete_projection method.
+
+           name: Represents the projection name.
+           timeout: Represents the time in seconds to wait for a projection to
+           finish its run.
+
+           return: JSON object with an error message, a warning message or a
+           correct projection result
+        """
+        return self.__observer.wait(projection_name, timeout)

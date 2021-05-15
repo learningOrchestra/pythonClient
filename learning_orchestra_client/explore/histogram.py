@@ -1,8 +1,8 @@
-from ..observer import Observer
-from .._response_treat import ResponseTreat
+from learning_orchestra_client.observe.observe import Observer
+from learning_orchestra_client.util._response_treat import ResponseTreat
 import requests
 from typing import Union
-from .._entity_reader import EntityReader
+from learning_orchestra_client.util._entity_reader import EntityReader
 
 
 class ExploreHistogram:
@@ -25,14 +25,14 @@ class ExploreHistogram:
                            pretty_response: bool = False) \
             -> Union[dict, str]:
         """
-        description: This method run histogram algorithm to create a histogram
-        synchronously, the caller waits until the histogram is inserted into
+        description: This method creates a histogram
+        synchronously, so the caller waits until the histogram is inserted into
         the Learning Orchestra storage mechanism.
 
         dataset_name: Represents the name of dataset.
         histogram_name: Represents the name of histogram.
         fields: Represents a list of attributes.
-        pretty_response: If true return indented string, else return dict.
+        pretty_response: If true it returns a string, otherwise a dictionary.
 
         return: A JSON object with error or warning messages. In case of
         success, it returns a histogram.
@@ -57,16 +57,14 @@ class ExploreHistogram:
                             pretty_response: bool = False) \
             -> Union[dict, str]:
         """
-        description: This method run histogram algorithm to create a histogram
-        asynchronously, the caller does not wait until the histogram is
-        inserted into the Learning Orchestra storage mechanism. Instead,
-        the caller receives a JSON object with a URL to proceed future calls
-        to verify if the histogram was inserted.
+        description: This method creates a histogram
+        asynchronously, so the caller does not wait until the histogram is
+        inserted into the Learning Orchestra storage mechanism.
 
         dataset_name: Represents the name of dataset.
         histogram_name: Represents the name of histogram.
         fields: Represents a list of attributes.
-        pretty_response: If true return indented string, else return dict.
+        pretty_response: If true it returns a string, otherwise a dictionary.
 
         return: A JSON object with error or warning messages. In case of
         success, it returns a histogram.
@@ -86,12 +84,12 @@ class ExploreHistogram:
     def search_all_histograms(self, pretty_response: bool = False) \
             -> Union[dict, str]:
         """
-        description: This method retrieves all histogram names, it does not
+        description: This method retrieves all histogram metadata, it does not
         retrieve the histogram content.
 
-        pretty_response: If true return indented string, else return dict.
+        pretty_response: If true it returns a string, otherwise a dictionary.
 
-        return: A list with all histogram names stored in Learning Orchestra
+        return: A list with all histogram metadata stored in Learning Orchestra
         or an empty result.
         """
 
@@ -109,7 +107,7 @@ class ExploreHistogram:
         description: This method is responsible for retrieving the histogram
         content.
 
-        pretty_response: If true return indented string, else return dict.
+        pretty_response: If true it returns a string, otherwise a dictionary.
         histogram_name: Represents the histogram name.
         query: Query to make in MongoDB(default: empty query)
         limit: Number of rows to return in pagination(default: 10) (maximum is
@@ -130,10 +128,10 @@ class ExploreHistogram:
                          pretty_response: bool = False) -> Union[dict, str]:
         """
         description: This method is responsible for deleting a histogram.
-        The delete operation is always synchronous because it is very fast,
+        The delete operation is always asynchronous,
         since the deletion is performed in background.
 
-        pretty_response: If true return indented string, else return dict.
+        pretty_response: If true it returns a string, otherwise a dictionary.
         histogram_name: Represents the histogram name.
 
         return: JSON object with an error message, a warning message or a
@@ -144,3 +142,18 @@ class ExploreHistogram:
         response = requests.delete(cluster_url_histogram)
 
         return self.__response_treat.treatment(response, pretty_response)
+
+    def wait(self, name: str, timeout: int = None) -> dict:
+        """
+           description: This method is responsible to create a synchronization
+           barrier for the run_histogram_async method or delete_histogram
+           method.
+
+           name: Represents the histogram name.
+           timeout: Represents the time in seconds to wait for a histogram to
+           finish its run.
+
+           return: JSON object with an error message, a warning message or a
+           correct histogram result
+        """
+        return self.__observer.wait(name, timeout)

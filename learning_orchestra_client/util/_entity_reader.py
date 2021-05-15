@@ -25,3 +25,15 @@ class EntityReader:
 
         response = requests.get(request_url)
         return response
+
+    def read_explore_image_metadata(self,
+                                    name: str,
+                                    query: dict = {},
+                                    limit: int = 10,
+                                    skip: int = 0
+                                    ) -> Response:
+        request_url = f'{self.__entity_url}/{name}/metadata' \
+                      f'?query={query}&limit={limit}&skip={skip}'
+
+        response = requests.get(request_url)
+        return response

@@ -1,6 +1,6 @@
-from .observer import Observer
-from ._response_treat import ResponseTreat
-from ._entity_reader import EntityReader
+from learning_orchestra_client.observe.observe import Observer
+from learning_orchestra_client.util._response_treat import ResponseTreat
+from learning_orchestra_client.util._entity_reader import EntityReader
 import requests
 from typing import Union
 
@@ -26,20 +26,19 @@ class BuilderSparkMl:
                           model_classifiers: list,
                           pretty_response: bool = False) -> Union[dict, str]:
         """
-        description: This method resource join several steps of machine
-        learning workflow (transform, tune, train and evaluate) coupling in
-        a unique resource, builder creates several model predictions using
-        your own modeling code using a defined set of classifiers. This is made
-        synchronously, the caller waits until the model predictions are inserted
-        into the Learning Orchestra storage mechanism.
+        description: This method call runs several steps of a machine
+        learning pipeline (transform, tune, train and evaluate, for instance)
+        using a model code and several classifiers. It represents a way to run
+        an entire pipeline. The caller waits until the method execution ends,
+        since it is a synchronous method.
 
         train_dataset_name: Represent final train dataset.
         test_dataset_name: Represent final test dataset.
-        modeling_code: Represent Python3 code for pyspark preprocessing model
-        model_classifiers: list of initial classifiers to be used in model
-        pretty_response: returns indented string for visualization if True
+        modeling_code: Represent Python3 code for pyspark pre-processing model
+        model_classifiers: list of initial classifiers to be used in the model
+        pretty_response: if True it represents a result useful for visualization
 
-        return: The resulted predictions URIs.
+        return: The set of predictions (URIs of them).
         """
 
         request_body_content = {
@@ -63,22 +62,19 @@ class BuilderSparkMl:
                            model_classifiers: list,
                            pretty_response: bool = False) -> Union[dict, str]:
         """
-        description: This method resource join several steps of machine
-        learning workflow (transform, tune, train and evaluate) coupling in
-        a unique resource, builder creates several model predictions using
-        your own modeling code using a defined set of classifiers. This is made
-        asynchronously, the caller does not wait until the model predictions are
-        inserted into the Learning Orchestra storage mechanism. Instead, the
-        caller receives a JSON object with a URL to proceed future calls to
-        verify if the model predictions are inserted.
+        description: This method call runs several steps of a machine
+        learning pipeline (transform, tune, train and evaluate, for instance)
+        using a model code and several classifiers. It represents a way to run
+        an entire pipeline. The caller does not wait until the method execution
+        ends, since it is an asynchronous method.
 
         train_dataset_name: Represent final train dataset.
         test_dataset_name: Represent final test dataset.
-        modeling_code: Represent Python3 code for pyspark preprocessing model
-        model_classifiers: list of initial classifiers to be used in model
-        pretty_response: returns indented string for visualization if True
+        modeling_code: Represent Python3 code for pyspark pre-processing model
+        model_classifiers: list of initial classifiers to be used in the model
+        pretty_response: if True it represents a result useful for visualization
 
-        return: The resulted predictions URIs.
+        return: the URL to retrieve the Spark pipeline result
         """
 
         request_body_content = {
@@ -95,10 +91,10 @@ class BuilderSparkMl:
     def search_all_builders(self, pretty_response: bool = False) \
             -> Union[dict, str]:
         """
-        description: This method retrieves all model predictions metadata, it
+        description: This method retrieves all model predictions metadata. It
         does not retrieve the model predictions content.
 
-        pretty_response: If true return indented string, else return dict.
+        pretty_response: If true it returns a string, otherwise a dictionary.
 
         return: A list with all model predictions metadata stored in Learning
         Orchestra or an empty result.
@@ -119,16 +115,16 @@ class BuilderSparkMl:
         description: This method is responsible for retrieving the model
         predictions content.
 
-        pretty_response: If true return indented string, else return dict.
+        pretty_response: If true it returns a string, otherwise a dictionary.
         builder_name: Represents the model predictions name.
         query: Query to make in MongoDB(default: empty query)
         limit: Number of rows to return in pagination(default: 10) (maximum is
         set at 20 rows per request)
         skip: Number of rows to skip in pagination(default: 0)
 
-        return: A page with some tuples or registers inside or an error if there
-        is no such projection. The current page is also returned to be used in
-        future content requests.
+        return: A page with some tuples or registers inside or an error if the
+        pipeline runs incorrectly. The current page is also returned to be used
+        in future content requests.
         """
 
         response = self.__entity_reader.read_entity_content(
@@ -140,7 +136,7 @@ class BuilderSparkMl:
             -> Union[dict, str]:
         """
         description:  This method is responsible for retrieving a specific
-        model prediction metadata.
+        model metadata.
 
         pretty_response: If true return indented string, else return dict.
         builder_name: Represents the model predictions name.
@@ -161,11 +157,11 @@ class BuilderSparkMl:
             -> Union[dict, str]:
         """
         description: This method is responsible for deleting a model prediction.
-        The delete operation is always synchronous because it is very fast,
+        The delete operation is always asynchronous,
         since the deletion is performed in background.
 
-        pretty_response: If true return indented string, else return dict.
-        builder_name: Represents the projection name.
+        pretty_response: If true it returns a string, otherwise a dictionary.
+        builder_name: Represents the pipeline name.
 
         return: JSON object with an error message, a warning message or a
         correct delete message
@@ -177,5 +173,16 @@ class BuilderSparkMl:
 
         return self.__response_treat.treatment(response, pretty_response)
 
-    def wait(self, dataset_name: str) -> dict:
-        return self.__observer.wait(dataset_name)
+    def wait(self, dataset_name: str, timeout: int = None) -> dict:
+        """
+           description: This method is responsible to create a synchronization
+           barrier for the run_spark_ml_async method.
+
+           dataset_name: Represents the pipeline name.
+           timeout: Represents the time in seconds to wait for a builder to
+           finish its run.
+
+           return: JSON object with an error message, a warning message or a
+           correct execution of a pipeline
+        """
+        return self.__observer.wait(dataset_name, timeout)
