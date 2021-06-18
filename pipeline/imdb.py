@@ -4,7 +4,7 @@ from learning_orchestra_client.model.scikitlearn import ModelScikitLearn
 from learning_orchestra_client.train.scikitlearn import TrainScikitLearn
 from learning_orchestra_client.predict.scikitlearn import PredictScikitLearn
 
-CLUSTER_IP = "http://34.123.167.241"
+CLUSTER_IP = "http://35.247.203.13"
 
 dataset_csv = DatasetCsv(CLUSTER_IP)
 

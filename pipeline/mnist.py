@@ -5,9 +5,10 @@ from learning_orchestra_client.train.tensorflow import TrainTensorflow
 from learning_orchestra_client.predict.tensorflow import PredictTensorflow
 from learning_orchestra_client.evaluate.tensorflow import EvaluateTensorflow
 
-CLUSTER_IP = "http://35.224.50.116"
+CLUSTER_IP = "http://35.247.197.191"
 
 dataset_generic = DatasetGeneric(CLUSTER_IP)
+
 dataset_generic.insert_dataset_async(
     dataset_name="mnist_train_images",
     url="https://drive.google.com/u/0/uc?"
