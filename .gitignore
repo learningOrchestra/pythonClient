@@ -1,12 +1,8 @@
 .idea
 learning_orchestra_client/.idea
-learning_orchestra_client/__pycache__
-learning_orchestra_client/dataset/__pycache__
-learning_orchestra_client/transform/__pycache__
-learning_orchestra_client/main.py
-learning_orchestra_client/explore/__pycache__
-learning_orchestra_client/builder/__pycache__
+__pycache__
 docs
+venv
 sentiment_analysis_output.py
 mnist_output.py
 mnist_treatment.py

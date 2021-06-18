@@ -10,8 +10,11 @@ class Observer:
     __INPUT_NAME = "filename"
 
     __FILENAME_REQUEST_FIELD = 'filename'
-    __OBSERVE_TYPE_REQUEST_FIELD = 'observe_type'
+    __OBSERVER_TYPE_REQUEST_FIELD = 'observe_type'
     __TIMEOUT_REQUEST_FIELD = 'timeout'
+    __OBSERVER_NAME_REQUEST_FIELD = 'observer_name'
+    __OBSERVER_PIPELINE_REQUEST_FIELD = 'pipeline'
+
 
     def __init__(self, cluster_ip: str):
         self.__api_path = "/api/learningOrchestra/v1/observer"
@@ -20,7 +23,8 @@ class Observer:
         self.cluster_ip = cluster_ip.replace("http://", "")
         self.__response_treat = ResponseTreat()
 
-    def wait(self, name: str, timeout: int=0, type:str="wait",
+    def wait(self, name: str, timeout: int=None, type:str="wait",
+             observer_name:str='',pipeline:[]=None,
              pretty_response: bool = False) -> dict:
         """
         :description: Observe the end of a pipe for a timeout seconds or
@@ -36,8 +40,9 @@ class Observer:
         a dictionary with the content of a mongo collection, representing
         any pipe result
         """
+        if timeout is None:
+            timeout = 0
 
-        print(type)
         if type == "all" or type == "wait" or type == '1':
             type = "wait"
         elif type == "finish" or type == "observe" or type == '2':
@@ -48,8 +53,10 @@ class Observer:
         request_url = f'{self.__service_url}'
         request_body = {
             self.__FILENAME_REQUEST_FIELD: name,
-            self.__OBSERVE_TYPE_REQUEST_FIELD: type,
+            self.__OBSERVER_TYPE_REQUEST_FIELD: type,
             self.__TIMEOUT_REQUEST_FIELD: timeout,
+            self.__OBSERVER_NAME_REQUEST_FIELD: observer_name,
+            self.__OBSERVER_PIPELINE_REQUEST_FIELD: pipeline
         }
 
         if self.debug:
@@ -68,11 +75,26 @@ class Observer:
             response = requests.get(url=url)
             print(response)
         else:
-            raise KeyError("collection not found in database")
+            print(observer_uri.json())
+            raise Exception(observer_uri.json()['result'])
 
-        return self.__response_treat.treatment(response,pretty_response)
+        if response.status_code >= 200 and response.status_code < 400:
+            response = self.__response_treat.treatment(response,pretty_response)
+        else:
+            raise Exception(response.json()['result'])
 
-    def start_observing_pipe(self, name: str, timeout: int=None,
+
+        delete_resp = requests.delete(url=url)
+
+        if self.debug:
+            print(f'waiting DELETE in {url}')
+        print(delete_resp)
+
+        return response
+
+
+    def start_observing_pipe(self, name: str, timeout: int=0,
+                             observer_name:str='',pipeline:[]=None,
                              pretty_response: bool = False) -> dict:
         """
         :description: It waits until a pipe change its content
@@ -89,7 +111,8 @@ class Observer:
         builtin next() method to iterate over changes.
         """
 
-        return self.wait(name, timeout, "finish",pretty_response)
+        return self.wait(name, timeout, "observe", observer_name, pipeline,
+                         pretty_response)
 
     def stop_observing_pipe(self,
                             name: str,
