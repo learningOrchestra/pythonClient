@@ -14,11 +14,12 @@ class Observer:
     __TIMEOUT_REQUEST_FIELD = 'timeout'
     __OBSERVER_NAME_REQUEST_FIELD = 'observer_name'
     __OBSERVER_PIPELINE_REQUEST_FIELD = 'pipeline'
+    __MICROSERVICE_PORT = '5010'
 
 
     def __init__(self, cluster_ip: str):
         self.__api_path = "/api/learningOrchestra/v1/observer"
-        self.__service_base_url = f'{cluster_ip}'
+        self.__service_base_url = f'{cluster_ip}:{self.__MICROSERVICE_PORT}'
         self.__service_url = f'{self.__service_base_url}{self.__api_path}'
         self.cluster_ip = cluster_ip.replace("http://", "")
         self.__response_treat = ResponseTreat()
@@ -59,23 +60,14 @@ class Observer:
             self.__OBSERVER_PIPELINE_REQUEST_FIELD: pipeline
         }
 
-        if self.debug:
-            print(f'waiting POST in {request_url}')
-            print(f'POST BODY: {request_body}')
-
         observer_uri = requests.post(url=f'{request_url}',
                                      json=request_body)
 
-        print(observer_uri)
         if(observer_uri.status_code >= 200 and observer_uri.status_code < 400):
             url = f"{self.__service_base_url}{observer_uri.json()['result']}"
-            if self.debug:
-                print(f'waiting GET in {url}')
 
             response = requests.get(url=url)
-            print(response)
         else:
-            print(observer_uri.json())
             raise Exception(observer_uri.json()['result'])
 
         if response.status_code >= 200 and response.status_code < 400:
@@ -83,13 +75,7 @@ class Observer:
         else:
             raise Exception(response.json()['result'])
 
-
         delete_resp = requests.delete(url=url)
-
-        if self.debug:
-            print(f'waiting DELETE in {url}')
-        print(delete_resp)
-
         return response
 
 
