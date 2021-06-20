@@ -1,7 +1,5 @@
 import requests
 from learning_orchestra_client._util._response_treat import ResponseTreat
-from pymongo import MongoClient, change_stream
-
 
 class Observer:
     debug = True
@@ -24,25 +22,44 @@ class Observer:
         self.cluster_ip = cluster_ip.replace("http://", "")
         self.__response_treat = ResponseTreat()
 
-    def wait(self, name: str, timeout: int=None, type:str="wait",
-             observer_name:str='',pipeline:[]=None,
-             pretty_response: bool = False) -> dict:
+    def wait(self, name: str, timeout: int=0,
+             observer_name:str='', pretty_response: bool = False) -> dict:
+
         """
-        :description: Observe the end of a pipe for a timeout seconds or
+        Observe the end of a pipe for a timeout seconds or
         until the pipe finishes its execution.
 
-        name: Represents the pipe name. Any tune, train, predict service can
-        wait its finish with a
-        wait method call.
-        timeout: the maximum time to wait the observed step, in seconds.
-        type: type of the pipeline to be observed ("all", "finish")
+        :param name: Represents the pipe name. Any tune, train, predict service can wait its finish with a wait method call.
+        :param timeout: the maximum time to wait the observed step, in seconds. If set to 0, there will be no timeout
+        :param observer_name: the name of the observer (default: observer_)
 
-        :return: If True it returns a String. Otherwise, it returns
-        a dictionary with the content of a mongo collection, representing
-        any pipe result
+        :return: Returns a dictionary with the content of a mongo collection, representing any pipe result
         """
-        if timeout is None:
-            timeout = 0
+
+        return self.watch(name=name,
+                         timeout=timeout,
+                         type="wait",
+                         observer_name=observer_name,
+                         pretty_response=pretty_response)
+
+    def watch(self, name: str, timeout: int=0, type:str="wait",
+             observer_name:str='',pipeline:[]=None,
+             pretty_response: bool = False) -> dict:
+
+        """
+        Observe the pipe for a timeout seconds or
+        until the pipe finishes its execution. It is a more complete method,
+        you can use it to configure your own pipelines if you wish. For more
+        simplistic uses, try the methods "wait" and "start_observing_pipe"
+
+        :param name: the name of the pipe to be observed. A train, predict, explore, transform or any other pipe can be observed.
+        :param timeout: the maximum time to wait the observed step, in seconds. If set to 0, there will be no timeout
+        :param type: type of the observation, it can be "wait" to observe the end of the pipe, "observe" to observe until the pipe change it's content or "custom" if you wish to provide your own mongo pipeline
+        :param observer_name: the name of the observer (default observer_)
+        :param pipeline: the custom pipeline that you wish to use on the observer. It is only used if type is set to "custom"
+
+        :return: Returns a dictionary with the content of a mongo collection, representing any pipe result
+        """
 
         if type == "all" or type == "wait" or type == '1':
             type = "wait"
@@ -73,6 +90,9 @@ class Observer:
         if response.status_code >= 200 and response.status_code < 400:
             response = self.__response_treat.treatment(response,pretty_response)
         else:
+            if response.status_code == 408:
+                raise TimeoutError(response.json()['result'])
+
             raise Exception(response.json()['result'])
 
         delete_resp = requests.delete(url=url)
@@ -80,30 +100,23 @@ class Observer:
 
 
     def start_observing_pipe(self, name: str, timeout: int=0,
-                             observer_name:str='',pipeline:[]=None,
+                             observer_name:str='',
                              pretty_response: bool = False) -> dict:
         """
-        :description: It waits until a pipe change its content
+        It waits until a pipe change its content
         (replace, insert, update and delete mongoDB collection operation
         types), so it is a bit different
         from wait method with a timeout and a finish explicit condition.
 
-        :name: the name of the pipe to be observed. A train, predict, explore,
-        transform or any
-        other pipe can be observed.
-        timeout: the maximum time to wait the observed step, in milliseconds.
+        :param name: the name of the pipe to be observed. A train, predict, explore, transform or any other pipe can be observed.
+        :param timeout: the maximum time to wait the observed step, in seconds. If set to 0, there will be no timeout
+        :param observer_name: the name of the observer (default observer_)
 
-        :return: A pymongo CollectionChangeStream object. You must use the
-        builtin next() method to iterate over changes.
+        :returns: a dictionary with the content of a mongo collection, representing any pipe result
         """
 
-        return self.wait(name, timeout, "observe", observer_name, pipeline,
-                         pretty_response)
-
-    def stop_observing_pipe(self,
-                            name: str,
-                            pretty_response: bool = False) -> dict:
-
-        request_url = f'{self.__service_url}/{name}'
-        response = requests.delete(url=request_url)
-        return self.__response_treat.treatment(response, pretty_response)
+        return self.watch(name=name,
+                          timeout=timeout,
+                          type="observe",
+                          observer_name=observer_name,
+                          pretty_response=pretty_response)
