@@ -3,16 +3,16 @@ from learning_orchestra_client.transform.projection import TransformProjection
 from learning_orchestra_client.transform.data_type import TransformDataType
 from learning_orchestra_client.builder.builder import BuilderSparkMl
 
-CLUSTER_IP = "http://35.193.116.104"
+CLUSTER_IP = "http://35.247.197.191"
 
 dataset_csv = DatasetCsv(CLUSTER_IP)
 
 dataset_csv.insert_dataset_async(
-    url="https://filebin.net/boniydu54k710l54/train.csv?t=s350xryf",
+    url="https://filebin.net/48b0fwidk4amp7fa/train.csv",
     dataset_name="titanic_training",
 )
 dataset_csv.insert_dataset_async(
-    url="https://filebin.net/udtf7eogfgasqnx5/test.csv?t=h79pcy0l",
+    url="https://filebin.net/1ewibio2rziv6lrm/test.csv",
     dataset_name="titanic_testing"
 )
 
