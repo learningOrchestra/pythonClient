@@ -8,11 +8,11 @@ CLUSTER_IP = "http://35.193.116.104"
 dataset_csv = DatasetCsv(CLUSTER_IP)
 
 dataset_csv.insert_dataset_async(
-    url="https://drive.google.com/uc?export=download&id=1ccWBTDolhD50NaIIo50H4k_odvD_rlFr",
+    url="https://dl.dropboxusercontent.com/s/ro3uhqpvf2mld17/train.csv?dl=0",
     dataset_name="titanic_training",
 )
 dataset_csv.insert_dataset_async(
-    url="https://drive.google.com/uc?export=download&id=1DG5biYaUH-MDhtCfDpZgiSn5Is1ZkMuv",
+    url="https://dl.dropboxusercontent.com/s/jyv8fp0mhqwlsdm/test.csv?dl=0",
     dataset_name="titanic_testing"
 )
 
