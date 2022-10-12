@@ -3,6 +3,7 @@ from pymongo import MongoClient, change_stream
 
 class Observer:
     __TIMEOUT_TIME_MULTIPLICATION = 1000
+    __MAX_WAIT_TIME = 240
 
     def __init__(self, cluster_ip: str):
         cluster_ip = cluster_ip.replace("http://", "")
@@ -22,6 +23,7 @@ class Observer:
         wait its finish with a
         wait method call.
         timeout: the maximum time to wait the observed step, in seconds.
+        Default time is 4 minutes.
 
         :return: If True it returns a String. Otherwise, it returns
         a dictionary with the content of a mongo collection, representing
@@ -44,6 +46,9 @@ class Observer:
                     ]
             }}
         ]
+
+        timeout = self.__MAX_WAIT_TIME if timeout is None else timeout 
+
         return dataset_collection.watch(
             observer_query,
             full_document='updateLookup',
