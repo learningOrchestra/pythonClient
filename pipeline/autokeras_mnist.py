@@ -7,12 +7,24 @@ from learning_orchestra_client.evaluate.autokeras import EvaluateAutokeras
 
 CLUSTER_IP = "http://34.125.22.143"
 
+dataset_generic = DatasetGeneric(CLUSTER_IP)
+dataset_generic.insert_dataset_async(
+    dataset_name=f"mnist_dataset_autokeras",
+    url="https://storage.googleapis.com/tensorflow/tf-keras-datasets/mnist.npz",
+)
+dataset_generic.wait(f"mnist_dataset_autokeras")
+
 function_python = FunctionPython(CLUSTER_IP)
 mnist_load_data = '''
 
-from tensorflow.keras.datasets import mnist
+def load_data(path):
+    import numpy as np
+    with np.load(path) as f:
+        x_train, y_train = f['x_train'], f['y_train']
+        x_test, y_test = f['x_test'], f['y_test']
+        return (x_train, y_train), (x_test, y_test)
 
-(x_train, y_train), (x_test, y_test) = mnist.load_data()
+(x_train, y_train), (x_test, y_test) = load_data(mnist_dataset_autokeras)
 
 response = {
     "test_images": x_test,
@@ -24,7 +36,9 @@ response = {
 
 function_python.run_function_async(
     name=f"mnist_load_data",
-    parameters={},
+    parameters={
+        "mnist_dataset_autokeras": f"$mnist_dataset_autokeras"
+    },
     code=mnist_load_data)
 function_python.wait(f"mnist_load_data")
 
