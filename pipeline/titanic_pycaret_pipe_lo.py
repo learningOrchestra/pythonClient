@@ -12,8 +12,8 @@ dataset_csv.insert_dataset_async(
 dataset_csv.wait(dataset_name="train",
                  timeout=1)
 
-version = 5
-name = f'titanic{version}'
+
+name = f'titanic'
 codigo = """
 from pycaret import classification
 from pycaret.classification import pull,tune_model
