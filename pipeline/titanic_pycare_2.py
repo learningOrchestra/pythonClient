@@ -94,3 +94,17 @@ evaluate_pycaret.create_evaluate_async(
 )
 
 evaluate_pycaret.wait("titanic_evaluate_pycaret")
+
+show_mnist_evaluate = '''
+print(titanic_evaluate_pycaret)
+response = None
+'''
+function_python.run_function_async(
+    name="titanic_evaluate_pycaret_print",
+    parameters={
+        "titanic_evaluate_pycaret": "$titanic_evaluate_pycaret"
+    },
+    code=show_mnist_evaluate
+)
+
+function_python.wait("titanic_evaluate_pycaret_print")
